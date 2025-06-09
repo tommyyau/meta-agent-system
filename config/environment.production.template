@@ -1,0 +1,82 @@
+# Production Environment Configuration
+# Copy to .env.production and configure your values
+# DO NOT commit this file to version control
+
+NODE_ENV=production
+DEBUG=false
+LOG_LEVEL=error
+
+# Production Next.js Configuration
+NEXTAUTH_URL=https://your-production-domain.com
+NEXT_PUBLIC_APP_URL=https://your-production-domain.com
+NEXT_PUBLIC_API_URL=https://your-production-domain.com/api
+
+# Production Database (Supabase Production)
+NEXT_PUBLIC_SUPABASE_URL=https://your-prod-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-production-supabase-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-production-supabase-service-role-key
+SUPABASE_JWT_SECRET=your-production-supabase-jwt-secret
+
+# Production MongoDB (Analytics)
+MONGODB_URI=mongodb+srv://prod-user:secure-password@prod-cluster.mongodb.net/meta-agent-prod
+MONGODB_DB_NAME=meta-agent-production
+
+# Production OpenAI (Full quotas)
+OPENAI_API_KEY=sk-your-production-openai-api-key
+OPENAI_ORG_ID=org-your-production-organization-id
+OPENAI_MODEL_PRIMARY=gpt-4
+OPENAI_MODEL_FALLBACK=gpt-3.5-turbo
+OPENAI_MAX_TOKENS=4000
+OPENAI_RATE_LIMIT_PER_MINUTE=60
+OPENAI_TEMPERATURE=0.7
+
+# Production Redis (Upstash Production)
+UPSTASH_REDIS_REST_URL=https://your-prod-redis.upstash.io
+UPSTASH_REDIS_REST_TOKEN=your-production-redis-token
+REDIS_SESSION_TTL=86400
+REDIS_CACHE_TTL=3600
+
+# Production Security (Strong keys required)
+NEXTAUTH_SECRET=your-production-nextauth-secret-min-32-chars
+JWT_SECRET=your-production-jwt-secret-min-32-chars
+ENCRYPTION_KEY=your-production-encryption-key-32-chars
+WEBHOOK_SECRET=your-production-webhook-secret-key
+
+# Production CORS (Restricted to production domains)
+CORS_ORIGINS=https://your-production-domain.com,https://www.your-domain.com
+
+# Production Monitoring
+SENTRY_DSN=https://your-production-sentry-dsn@sentry.io/project-id
+SENTRY_ORG=your-organization
+SENTRY_PROJECT=meta-agent-system
+SENTRY_ENVIRONMENT=production
+
+# Production Email
+RESEND_API_KEY=re_your-production-resend-api-key
+FROM_EMAIL=notifications@your-domain.com
+ADMIN_EMAIL=admin@your-domain.com
+
+# Production Rate Limiting (Strict)
+RATE_LIMIT_REQUESTS_PER_MINUTE=100
+RATE_LIMIT_REQUESTS_PER_HOUR=1000
+RATE_LIMIT_REQUESTS_PER_DAY=10000
+OPENAI_DAILY_QUOTA=1000
+OPENAI_MONTHLY_BUDGET=500
+
+# Production Feature Flags (Conservative)
+ENABLE_ANALYTICS=true
+ENABLE_ESCAPE_HATCH=true
+ENABLE_ASSUMPTION_CASCADE=true
+ENABLE_ADVANCED_PROFILING=true
+ENABLE_WIREFRAME_GENERATION=true
+ENABLE_DEBUG_MODE=false
+ENABLE_EXPERIMENTAL_FEATURES=false
+
+# Production Debugging (Minimal)
+ENABLE_QUERY_LOGGING=false
+ENABLE_API_LOGGING=false
+ENABLE_PERFORMANCE_MONITORING=true
+
+# Production Specific
+NEXT_PUBLIC_VERCEL_ENV=production
+VERCEL_URL=your-production-domain.com 

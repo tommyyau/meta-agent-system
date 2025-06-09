@@ -1,0 +1,290 @@
+# Meta-Agent System CI/CD Pipeline
+# This replaces traditional Terraform CI/CD with Vercel-optimized workflows
+
+name: 🚀 Meta-Agent CI/CD
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '20'
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+jobs:
+  # Quality Checks
+  quality-checks:
+    name: 🔍 Quality Checks
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: 📥 Install dependencies
+        run: npm ci
+        
+      - name: 🔍 Run ESLint
+        run: npm run lint
+        
+      - name: 🎨 Check Prettier formatting
+        run: npm run format:check
+        
+      - name: 🔍 TypeScript type checking
+        run: npm run type-check
+        
+      - name: 🧪 Run unit tests
+        run: npm run test:unit
+        
+      - name: 📊 Run test coverage
+        run: npm run test:coverage
+        
+      - name: 📤 Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage/lcov.info
+
+  # Security Scanning
+  security-scan:
+    name: 🔒 Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        
+      - name: 🔒 Run security audit
+        run: npm audit --audit-level=high
+        
+      - name: 🔍 Scan for secrets
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: main
+          head: HEAD
+
+  # Build Verification
+  build-test:
+    name: 🏗️ Build Test
+    runs-on: ubuntu-latest
+    needs: [quality-checks]
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: 📥 Install dependencies
+        run: npm ci
+        
+      - name: 🏗️ Build application
+        run: npm run build
+        env:
+          NODE_ENV: production
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL_TEST }}
+          
+      - name: 📤 Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: .next/
+
+  # Preview Deployment (for PRs)
+  deploy-preview:
+    name: 🚀 Deploy Preview
+    runs-on: ubuntu-latest
+    needs: [quality-checks, security-scan, build-test]
+    if: github.event_name == 'pull_request'
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: 📥 Install Vercel CLI
+        run: npm install --global vercel@latest
+        
+      - name: 🔗 Pull Vercel environment
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+        
+      - name: 🏗️ Build project artifacts
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+        
+      - name: 🚀 Deploy to Vercel Preview
+        id: deploy-preview
+        run: |
+          url=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
+          echo "preview-url=$url" >> $GITHUB_OUTPUT
+          
+      - name: 💬 Comment Preview URL
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🚀 **Preview Deployment Ready!**
+              
+              📱 **Preview URL:** ${{ steps.deploy-preview.outputs.preview-url }}
+              
+              🔍 **What to test:**
+              - User profile detection
+              - Conversation flow
+              - Escape hatch functionality
+              - Wireframe generation
+              
+              ⚡ This preview will be automatically updated on new commits.`
+            })
+
+  # Production Deployment (for main branch)
+  deploy-production:
+    name: 🌟 Deploy Production
+    runs-on: ubuntu-latest
+    needs: [quality-checks, security-scan, build-test]
+    if: github.ref == 'refs/heads/main'
+    environment: production
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: 📥 Install Vercel CLI
+        run: npm install --global vercel@latest
+        
+      - name: 🔗 Pull Vercel environment
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        
+      - name: 🏗️ Build project artifacts
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        
+      - name: 🌟 Deploy to Production
+        id: deploy-production
+        run: |
+          url=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          echo "production-url=$url" >> $GITHUB_OUTPUT
+          
+      - name: 🔄 Update alias (if custom domain)
+        if: vars.CUSTOM_DOMAIN
+        run: vercel alias set ${{ steps.deploy-production.outputs.production-url }} ${{ vars.CUSTOM_DOMAIN }} --token=${{ secrets.VERCEL_TOKEN }}
+        
+      - name: 📊 Setup monitoring
+        run: |
+          # Create Sentry release
+          if [ -n "${{ secrets.SENTRY_AUTH_TOKEN }}" ]; then
+            npx @sentry/cli releases new ${{ github.sha }}
+            npx @sentry/cli releases set-commits ${{ github.sha }} --auto
+            npx @sentry/cli releases finalize ${{ github.sha }}
+          fi
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ vars.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT }}
+
+  # E2E Testing (after deployment)
+  e2e-tests:
+    name: 🧪 E2E Tests
+    runs-on: ubuntu-latest
+    needs: [deploy-preview]
+    if: github.event_name == 'pull_request'
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: 📥 Install dependencies
+        run: npm ci
+        
+      - name: 🧪 Run Playwright tests
+        run: npm run test:e2e
+        env:
+          BASE_URL: ${{ needs.deploy-preview.outputs.preview-url }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          
+      - name: 📤 Upload test results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: playwright-results
+          path: test-results/
+
+  # Performance Testing
+  performance-tests:
+    name: ⚡ Performance Tests
+    runs-on: ubuntu-latest
+    needs: [deploy-production]
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        
+      - name: ⚡ Run Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v10
+        with:
+          urls: |
+            ${{ needs.deploy-production.outputs.production-url }}
+            ${{ needs.deploy-production.outputs.production-url }}/dashboard
+          configPath: './infrastructure/lighthouse/lighthouserc.json'
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+
+  # Notification
+  notify-deployment:
+    name: 📢 Notify Team
+    runs-on: ubuntu-latest
+    needs: [deploy-production, performance-tests]
+    if: github.ref == 'refs/heads/main' && always()
+    
+    steps:
+      - name: 📢 Slack notification
+        if: always()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          channel: '#deployments'
+          message: |
+            🚀 **Meta-Agent System Deployed!**
+            
+            **Status:** ${{ needs.deploy-production.result == 'success' && '✅ Success' || '❌ Failed' }}
+            **Environment:** Production
+            **URL:** ${{ needs.deploy-production.outputs.production-url }}
+            **Commit:** ${{ github.sha }}
+            **Author:** ${{ github.actor }}
+            
+            ${{ needs.performance-tests.result == 'success' && '⚡ Performance tests passed' || '⚠️ Performance tests failed' }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} 

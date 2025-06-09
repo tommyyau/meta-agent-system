@@ -1,0 +1,137 @@
+# External Services Configuration for Vercel Deployment
+# This file documents the recommended external services for the meta-agent system
+
+services:
+  
+  # Database - PlanetScale (MySQL) or Supabase (PostgreSQL)
+  database:
+    provider: "supabase"  # or "planetscale"
+    
+    supabase_config:
+      # PostgreSQL with real-time features
+      url: "https://your-project.supabase.co"
+      anon_key: "your-anon-key"
+      service_role_key: "your-service-role-key"
+      features:
+        - "Real-time subscriptions"
+        - "Row Level Security (RLS)"
+        - "Built-in Auth"
+        - "Storage for wireframes"
+        - "Edge Functions"
+    
+    planetscale_config:
+      # Serverless MySQL alternative
+      connection_string: "mysql://username:password@host/database?sslaccept=strict"
+      features:
+        - "Branching (like Git for databases)"
+        - "Non-blocking schema changes"
+        - "Automatic scaling"
+        - "Built-in analytics"
+
+  # Redis Cache - Upstash Redis
+  cache:
+    provider: "upstash"
+    config:
+      rest_url: "https://your-redis.upstash.io"
+      rest_token: "your-rest-token"
+      features:
+        - "Serverless Redis"
+        - "Global replication"
+        - "REST API"
+        - "Per-request pricing"
+
+  # Analytics - MongoDB Atlas or Upstash
+  analytics:
+    provider: "mongodb_atlas"  # or "upstash"
+    
+    mongodb_config:
+      connection_string: "mongodb+srv://username:password@cluster.mongodb.net/meta-agent"
+      features:
+        - "Document database"
+        - "Aggregation pipelines"
+        - "Time series collections"
+        - "Charts and dashboards"
+    
+    upstash_config:
+      # Alternative: Vector database for embeddings
+      vector_url: "https://your-vector.upstash.io"
+      vector_token: "your-vector-token"
+
+  # File Storage - Vercel Blob or Supabase Storage
+  storage:
+    provider: "vercel_blob"  # or "supabase_storage"
+    
+    vercel_blob_config:
+      # Built-in to Vercel
+      features:
+        - "CDN distribution"
+        - "Automatic optimization"
+        - "Per-request pricing"
+        - "Direct uploads"
+    
+    supabase_storage_config:
+      bucket_name: "wireframes"
+      features:
+        - "Image transformations"
+        - "CDN distribution"
+        - "Row Level Security"
+        - "Resumable uploads"
+
+  # Monitoring - Vercel Analytics + Sentry
+  monitoring:
+    vercel_analytics:
+      enabled: true
+      features:
+        - "Web Vitals"
+        - "Audience insights"
+        - "Real-time metrics"
+    
+    sentry:
+      dsn: "https://your-dsn@sentry.io/project-id"
+      features:
+        - "Error tracking"
+        - "Performance monitoring"
+        - "Release tracking"
+
+  # Email - Resend
+  email:
+    provider: "resend"
+    config:
+      api_key: "your-resend-api-key"
+      from_email: "noreply@meta-agent.ai"
+      features:
+        - "Simple API"
+        - "Built for developers"
+        - "High deliverability"
+
+# Environment Variables Required
+environment_variables:
+  required:
+    - OPENAI_API_KEY
+    - DATABASE_URL
+    - REDIS_URL
+    - SENTRY_DSN
+    - RESEND_API_KEY
+  
+  optional:
+    - MONGODB_URL
+    - SUPABASE_ANON_KEY
+    - SUPABASE_SERVICE_ROLE_KEY
+    - VERCEL_BLOB_READ_WRITE_TOKEN
+
+# Deployment Notes
+deployment:
+  vercel_features:
+    - "Automatic HTTPS"
+    - "Global CDN"
+    - "Instant rollbacks"
+    - "Preview deployments"
+    - "Edge Functions"
+    - "Serverless Functions"
+  
+  benefits:
+    - "Zero configuration scaling"
+    - "Built-in CI/CD"
+    - "Performance monitoring"
+    - "Cost-effective for MVP"
+    - "Easy team collaboration" 
