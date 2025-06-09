@@ -25,7 +25,9 @@
     "generate:secrets": "node -e \"console.log('NEXTAUTH_SECRET=' + require('crypto').randomBytes(32).toString('hex')); console.log('JWT_SECRET=' + require('crypto').randomBytes(32).toString('hex')); console.log('ENCRYPTION_KEY=' + require('crypto').randomBytes(32).toString('hex'))\"",
     "test:openai": "node scripts/test-openai.js",
     "test:db": "node scripts/test-db.js",
-    "test:services": "npm run test:openai && npm run test:db"
+    "test:services": "npm run test:openai && npm run test:db",
+    "test:agent-selection": "node scripts/test-agent-selection.js",
+    "test:sessions": "node scripts/test-session-management.js"
   },
   "dependencies": {
     "@headlessui/react": "^1.7.0",
@@ -46,9 +48,10 @@
     "framer-motion": "^10.16.0",
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.3.0",
-    "nanoid": "^5.0.0",
+    "nanoid": "^5.1.5",
     "next": "^14.0.0",
     "next-auth": "^4.24.0",
+    "node-fetch": "^3.3.2",
     "openai": "^4.20.0",
     "postcss": "^8.4.0",
     "react": "^18.2.0",
