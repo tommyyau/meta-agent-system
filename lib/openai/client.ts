@@ -347,6 +347,10 @@ export const openaiService = new OpenAIService()
 // Export types (interfaces are already exported above)
 
 // Export OpenAI types for convenience
+// Export the OpenAI client instance for direct usage
+export { openai }
+
+// Re-export OpenAI types for convenience
 export type ChatCompletion = OpenAI.Chat.Completions.ChatCompletion
 export type ChatCompletionChunk = OpenAI.Chat.Completions.ChatCompletionChunk
 export type ChatCompletionMessage = OpenAI.Chat.Completions.ChatCompletionMessage
