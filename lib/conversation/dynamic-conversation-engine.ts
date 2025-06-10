@@ -8,6 +8,7 @@
 import { openai } from '../openai/client'
 import { EnhancedResponseAnalyzer, type EnhancedResponseAnalysis } from './response-analyzer'
 import { DomainQuestionGenerator } from './domain-question-generator'
+import { AdaptiveQuestioningStyleEngine, type QuestioningStyle } from './adaptive-questioning-style'
 import type { 
   ConversationContext, 
   ConversationResponse, 
@@ -26,6 +27,7 @@ export class DynamicConversationEngine {
   private readonly temperature: number
   private readonly responseAnalyzer: EnhancedResponseAnalyzer
   private readonly domainQuestionGenerator: DomainQuestionGenerator
+  private readonly adaptiveStyleEngine: AdaptiveQuestioningStyleEngine
 
   constructor(
     model: string = 'gpt-4o-mini',
@@ -37,6 +39,7 @@ export class DynamicConversationEngine {
     this.temperature = temperature
     this.responseAnalyzer = new EnhancedResponseAnalyzer(model)
     this.domainQuestionGenerator = new DomainQuestionGenerator(model)
+    this.adaptiveStyleEngine = new AdaptiveQuestioningStyleEngine(model)
   }
 
   /**
@@ -53,6 +56,43 @@ export class DynamicConversationEngine {
       console.error('Error in enhanced question generation, falling back to basic generation:', error)
       // Fallback to basic question generation
       return await this.generateNextQuestion(context)
+    }
+  }
+
+  /**
+   * Generate adaptive question with style matching user sophistication and engagement
+   */
+  async generateAdaptiveQuestion(
+    context: ConversationContext,
+    responseAnalysis: EnhancedResponseAnalysis
+  ): Promise<QuestionGenerationResult & { questioningStyle: QuestioningStyle }> {
+    try {
+      // Determine optimal questioning style
+      const questioningStyle = this.adaptiveStyleEngine.determineQuestioningStyle(context, responseAnalysis)
+      
+      // Generate base question using domain expertise
+      const baseQuestion = await this.domainQuestionGenerator.generateDomainQuestion(context, responseAnalysis)
+      
+      // Adapt the question to the determined style
+      const adaptedQuestion = await this.adaptiveStyleEngine.generateStyleAdaptedQuestion(
+        context,
+        responseAnalysis,
+        questioningStyle,
+        baseQuestion
+      )
+      
+      return {
+        ...adaptedQuestion,
+        questioningStyle
+      }
+    } catch (error) {
+      console.error('Error in adaptive question generation, falling back to enhanced generation:', error)
+      // Fallback to enhanced generation
+      const fallbackQuestion = await this.generateNextQuestionEnhanced(context, responseAnalysis)
+      return {
+        ...fallbackQuestion,
+        questioningStyle: 'intermediate-guided' as QuestioningStyle
+      }
     }
   }
 
@@ -155,6 +195,26 @@ export class DynamicConversationEngine {
     recommendations: string[]
   }> {
     return await this.responseAnalyzer.monitorEngagement(conversationHistory, currentResponse)
+  }
+
+  /**
+   * Monitor questioning style effectiveness and recommend adaptations
+   */
+  monitorQuestioningStyleEffectiveness(
+    context: ConversationContext,
+    currentStyle: QuestioningStyle,
+    responseAnalysis: EnhancedResponseAnalysis
+  ): {
+    effectiveness: number
+    recommendedAdaptation?: QuestioningStyle
+    reasoning: string
+    confidence: number
+  } {
+    return this.adaptiveStyleEngine.monitorStyleEffectiveness(
+      context,
+      currentStyle,
+      responseAnalysis
+    )
   }
 
   /**

@@ -194,6 +194,8 @@ export interface QuestionGenerationResult {
     model: string
     tokens: number
     timestamp: string
+    questioningStyle?: string
+    styleProfile?: any
   }
 }
 
