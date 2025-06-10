@@ -28,7 +28,9 @@
     "test:agent-selection": "node scripts/test-agent-selection.js",
     "test:sessions": "node scripts/test-session-management.js",
     "test:conversation": "node scripts/test-conversation-state.js",
-    "test:profile": "node scripts/test-profile-detection.js"
+    "test:profile": "node scripts/test-profile-detection.js",
+    "demo:conversation": "node scripts/demo-conversation-system.js",
+    "test:milestone": "node scripts/test-summary.js"
   },
   "dependencies": {
     "@headlessui/react": "^1.7.0",
