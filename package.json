@@ -28,7 +28,8 @@
     "test:services": "npm run test:openai && npm run test:db",
     "test:agent-selection": "node scripts/test-agent-selection.js",
     "test:sessions": "node scripts/test-session-management.js",
-    "test:conversation": "node scripts/test-conversation-state.js"
+    "test:conversation": "node scripts/test-conversation-state.js",
+    "test:profile": "node scripts/test-profile-detection.js"
   },
   "dependencies": {
     "@headlessui/react": "^1.7.0",
