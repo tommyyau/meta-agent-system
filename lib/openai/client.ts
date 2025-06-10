@@ -66,9 +66,9 @@ class OpenAIRateLimiter {
   }
 
   async trackCost(usage: OpenAI.Completions.CompletionUsage): Promise<void> {
-    // Approximate cost calculation (GPT-4: $0.03/1K input, $0.06/1K output)
-    const inputCost = (usage.prompt_tokens / 1000) * 0.03
-    const outputCost = (usage.completion_tokens / 1000) * 0.06
+    // Approximate cost calculation (GPT-4o mini: $0.00015/1K input, $0.0006/1K output)
+    const inputCost = (usage.prompt_tokens / 1000) * 0.00015
+    const outputCost = (usage.completion_tokens / 1000) * 0.0006
     const totalCost = inputCost + outputCost
 
     this.state.monthlyBudget += totalCost

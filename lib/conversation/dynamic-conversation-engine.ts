@@ -6,6 +6,7 @@
  */
 
 import { openai } from '@/lib/openai/client'
+import { EnhancedResponseAnalyzer, type EnhancedResponseAnalysis } from './response-analyzer'
 import type { 
   ConversationContext, 
   ConversationResponse, 
@@ -22,15 +23,17 @@ export class DynamicConversationEngine {
   private readonly model: string
   private readonly maxTokens: number
   private readonly temperature: number
+  private readonly responseAnalyzer: EnhancedResponseAnalyzer
 
   constructor(
-    model: string = 'gpt-4',
+    model: string = 'gpt-4o-mini',
     maxTokens: number = 1000,
     temperature: number = 0.7
   ) {
     this.model = model
     this.maxTokens = maxTokens
     this.temperature = temperature
+    this.responseAnalyzer = new EnhancedResponseAnalyzer(model)
   }
 
   /**
@@ -91,67 +94,47 @@ export class DynamicConversationEngine {
   }
 
   /**
-   * Analyze user response for sophistication, engagement, and escape signals
+   * Analyze user response using enhanced multi-dimensional analysis
    */
   async analyzeResponse(
     userResponse: string,
     context: ConversationContext
-  ): Promise<ConversationResponse> {
+  ): Promise<EnhancedResponseAnalysis> {
     try {
-      const prompt = this.buildResponseAnalysisPrompt(userResponse, context)
-      
-      const response = await openai.chat.completions.create({
-        model: this.model,
-        messages: [
-          {
-            role: 'system',
-            content: prompt
-          }
-        ],
-        max_tokens: this.maxTokens,
-        temperature: 0.3 // Lower temperature for more consistent analysis
-      })
-
-      const content = response.choices[0].message.content || '{}'
-      let analysis
-      
-      try {
-        analysis = JSON.parse(content)
-      } catch (parseError) {
-        // If JSON parsing fails, try to extract JSON from the response
-        const jsonMatch = content.match(/\{[\s\S]*\}/)
-        if (jsonMatch) {
-          analysis = JSON.parse(jsonMatch[0])
-        } else {
-          throw new Error(`Invalid JSON response from GPT-4: ${content}`)
-        }
-      }
-      
-      return {
-        sophisticationScore: analysis.sophisticationScore,
-        engagementLevel: analysis.engagementLevel,
-        clarityScore: analysis.clarityScore,
-        domainKnowledge: analysis.domainKnowledge,
-        escapeSignals: analysis.escapeSignals || {
-          detected: false,
-          type: null,
-          confidence: 0
-        },
-        extractedEntities: analysis.extractedEntities || [],
-        sentiment: analysis.sentiment,
-        suggestedAdaptations: analysis.suggestedAdaptations || [],
-        nextQuestionHints: analysis.nextQuestionHints || [],
-        metadata: {
-          model: this.model,
-          tokens: response.usage?.total_tokens || 0,
-          timestamp: new Date().toISOString(),
-          responseLength: userResponse.length
-        }
-      }
+      return await this.responseAnalyzer.analyzeResponse(userResponse, context)
     } catch (error) {
       console.error('Error analyzing response:', error)
       throw new Error(`Failed to analyze response: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
+  }
+
+  /**
+   * Quick sophistication check for real-time adaptation
+   */
+  async quickSophisticationCheck(
+    userResponse: string,
+    domain: string
+  ): Promise<{
+    level: SophisticationLevel
+    confidence: number
+    keyIndicators: string[]
+  }> {
+    return await this.responseAnalyzer.quickSophisticationCheck(userResponse, domain as any)
+  }
+
+  /**
+   * Monitor engagement trends across conversation
+   */
+  async monitorEngagement(
+    conversationHistory: any[],
+    currentResponse: string
+  ): Promise<{
+    currentLevel: number
+    trend: 'increasing' | 'stable' | 'decreasing'
+    alertLevel: 'none' | 'mild' | 'moderate' | 'high'
+    recommendations: string[]
+  }> {
+    return await this.responseAnalyzer.monitorEngagement(conversationHistory, currentResponse)
   }
 
   /**
@@ -184,7 +167,7 @@ export class DynamicConversationEngine {
   updateContext(
     context: ConversationContext,
     userResponse: string,
-    responseAnalysis: ConversationResponse,
+    responseAnalysis: EnhancedResponseAnalysis,
     generatedQuestion?: QuestionGenerationResult
   ): ConversationContext {
     const updatedHistory = [
@@ -198,7 +181,7 @@ export class DynamicConversationEngine {
       }
     ]
 
-    // Update profile based on latest analysis
+    // Update profile based on enhanced analysis
     const updatedProfile: UserProfile = {
       ...context.userProfile,
       sophisticationLevel: this.calculateSophisticationTrend(updatedHistory),

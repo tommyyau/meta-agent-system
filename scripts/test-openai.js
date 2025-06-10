@@ -83,7 +83,7 @@ async function testOpenAI() {
     
     // Test configuration
     log.title('📋 Configuration Test')
-    log.info(`Primary model: ${process.env.OPENAI_MODEL_PRIMARY || 'gpt-4'}`)
+    log.info(`Primary model: ${process.env.OPENAI_MODEL_PRIMARY || 'gpt-4o-mini'}`)
     log.info(`Fallback model: ${process.env.OPENAI_MODEL_FALLBACK || 'gpt-3.5-turbo'}`)
     log.info(`Rate limit: ${process.env.OPENAI_RATE_LIMIT_PER_MINUTE || '60'} requests/minute`)
     log.info(`Daily quota: ${process.env.OPENAI_DAILY_QUOTA || '1000'} requests/day`)

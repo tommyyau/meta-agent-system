@@ -26,7 +26,7 @@ const environmentSchema = z.object({
   // OpenAI Configuration
   OPENAI_API_KEY: z.string().min(1),
   OPENAI_ORG_ID: z.string().optional(),
-  OPENAI_MODEL_PRIMARY: z.string().default('gpt-4'),
+  OPENAI_MODEL_PRIMARY: z.string().default('gpt-4o-mini'),
   OPENAI_MODEL_FALLBACK: z.string().default('gpt-3.5-turbo'),
   OPENAI_MAX_TOKENS: z.string().transform(Number).default('4000'),
   OPENAI_RATE_LIMIT_PER_MINUTE: z.string().transform(Number).default('60'),

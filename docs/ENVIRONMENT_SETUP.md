@@ -84,7 +84,7 @@ NEXT_PUBLIC_API_URL=http://localhost:3000/api
    ```bash
    OPENAI_API_KEY=sk-your-actual-api-key
    OPENAI_ORG_ID=org-your-organization-id  # Optional
-   OPENAI_MODEL_PRIMARY=gpt-4
+   OPENAI_MODEL_PRIMARY=gpt-4o-mini
    OPENAI_MODEL_FALLBACK=gpt-3.5-turbo
    OPENAI_MAX_TOKENS=4000
    OPENAI_RATE_LIMIT_PER_MINUTE=60

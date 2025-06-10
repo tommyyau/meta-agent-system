@@ -118,7 +118,7 @@ async function setupEnvironment() {
   }
 
   config.OPENAI_ORG_ID = await askQuestion('OpenAI Organization ID (optional)')
-  config.OPENAI_MODEL_PRIMARY = await askQuestion('Primary OpenAI model', 'gpt-4')
+  config.OPENAI_MODEL_PRIMARY = await askQuestion('Primary OpenAI model', 'gpt-4o-mini')
   config.OPENAI_MODEL_FALLBACK = await askQuestion('Fallback OpenAI model', 'gpt-3.5-turbo')
   config.OPENAI_MAX_TOKENS = await askQuestion('Max tokens per request', '4000')
   config.OPENAI_RATE_LIMIT_PER_MINUTE = await askQuestion('Rate limit per minute', '60')
