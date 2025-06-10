@@ -4,6 +4,7 @@ import { sessionStore } from '@/lib/services/session-store'
 import { profileAnalyzer } from '@/lib/services/profile-analyzer'
 import { agentSelector } from '@/lib/services/agent-selector'
 import { agentDeployer } from '@/lib/services/agent-deployer'
+import { agentTemplateManager } from '@/lib/services/agent-template-manager'
 
 /**
  * Master Agent Core Framework
@@ -211,35 +212,21 @@ export class MasterAgent {
    * Get list of available agent templates
    */
   private async getAvailableAgents(): Promise<AgentTemplate[]> {
-    // This will be implemented in the Agent Template System (TASK-004)
-    return []
+    return await agentTemplateManager.getAllTemplates()
   }
 
   /**
    * Get fallback general business agent
    */
   private async getFallbackAgent(): Promise<AgentTemplate> {
-    // Return a basic general business agent template
-    return {
-      id: 'general-business',
-      name: 'General Business Agent',
-      domain: 'general',
-      version: '1.0.0',
-      description: 'General purpose business application agent',
-      questionBank: [],
-      terminology: new Map(),
-      assumptionTemplates: [],
-      conversationFlow: {
-        stages: ['idea-clarity', 'user-workflow', 'technical-specs', 'wireframes'],
-        transitions: {},
-        configuration: {}
-      },
-      metadata: {
-        created: new Date(),
-        lastUpdated: new Date(),
-        deploymentCount: 0
-      }
+    // Get the general business template from the template manager
+    const generalTemplate = await agentTemplateManager.getTemplate('general-business')
+    if (generalTemplate) {
+      return generalTemplate
     }
+
+    // If not found, throw error (should not happen with proper initialization)
+    throw new Error('General business template not found')
   }
 
   /**
