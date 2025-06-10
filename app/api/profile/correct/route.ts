@@ -103,16 +103,16 @@ export async function POST(request: NextRequest) {
       result: {
         updatedProfile: {
           ...result.updatedProfile,
-          created: result.updatedProfile.created.toISOString(),
-          lastUpdated: result.updatedProfile.lastUpdated.toISOString(),
-          conversationHistory: result.updatedProfile.conversationHistory.map(msg => ({
+          created: result.updatedProfile.created instanceof Date ? result.updatedProfile.created.toISOString() : result.updatedProfile.created,
+          lastUpdated: result.updatedProfile.lastUpdated instanceof Date ? result.updatedProfile.lastUpdated.toISOString() : result.updatedProfile.lastUpdated,
+          conversationHistory: result.updatedProfile.conversationHistory.map((msg: any) => ({
             ...msg,
-            timestamp: msg.timestamp.toISOString()
+            timestamp: msg.timestamp instanceof Date ? msg.timestamp.toISOString() : msg.timestamp
           }))
         },
-        corrections: result.corrections.map(correction => ({
+        corrections: result.corrections.map((correction: any) => ({
           ...correction,
-          timestamp: correction.timestamp.toISOString()
+          timestamp: correction.timestamp instanceof Date ? correction.timestamp.toISOString() : correction.timestamp
         })),
         impact: result.impact
       },
@@ -174,9 +174,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       suggestions: suggestions.suggestions,
-      correctionHistory: correctionHistory.map(correction => ({
+      correctionHistory: correctionHistory.map((correction: any) => ({
         ...correction,
-        timestamp: correction.timestamp.toISOString()
+        timestamp: correction.timestamp instanceof Date ? correction.timestamp.toISOString() : correction.timestamp
       })),
       metadata: {
         totalSuggestions: suggestions.suggestions.length,

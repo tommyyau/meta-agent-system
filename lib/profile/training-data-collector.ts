@@ -413,7 +413,7 @@ export class TrainingDataCollector {
     const cutoffDate = new Date(Date.now() - this.config.retentionPeriodDays * 24 * 60 * 60 * 1000);
     let removedCount = 0;
 
-    for (const [id, dataPoint] of this.trainingData.entries()) {
+    for (const [id, dataPoint] of Array.from(this.trainingData.entries())) {
       if (dataPoint.metadata.timestamp < cutoffDate && dataPoint.quality === DataQuality.LOW) {
         this.trainingData.delete(id);
         removedCount++;

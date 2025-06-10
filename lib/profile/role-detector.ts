@@ -218,7 +218,7 @@ export class RoleDetector {
     // Check keywords for each role
     Object.entries(ROLE_INDICATORS).forEach(([role, indicators]) => {
       // Keyword matching
-      indicators.keywords.forEach(keyword => {
+      indicators.keywords.forEach((keyword: string) => {
         if (inputLower.includes(keyword.toLowerCase())) {
           roleScores[role as keyof typeof roleScores]++;
           foundIndicators[role as keyof typeof foundIndicators].push(keyword);
@@ -226,7 +226,7 @@ export class RoleDetector {
       });
 
       // Pattern matching
-      indicators.patterns.forEach(pattern => {
+      indicators.patterns.forEach((pattern: RegExp) => {
         const matches = input.match(pattern);
         if (matches) {
           roleScores[role as keyof typeof roleScores] += matches.length;
@@ -235,7 +235,7 @@ export class RoleDetector {
       });
 
       // Phrase matching
-      indicators.phrases.forEach(phrase => {
+      indicators.phrases.forEach((phrase: string) => {
         if (inputLower.includes(phrase.toLowerCase())) {
           roleScores[role as keyof typeof roleScores] += 2; // Phrases are more indicative
           foundIndicators[role as keyof typeof foundIndicators].push(phrase);
@@ -388,7 +388,7 @@ CONFIDENCE GUIDELINES:
 
 INPUT: "${input}"`;
 
-    if (conversationHistory && conversationHistory.length > 0) {
+    if (conversationHistory && Array.isArray(conversationHistory) && conversationHistory.length > 0) {
       user += `\n\nCONVERSATION HISTORY:\n${conversationHistory.slice(-3).map((msg, i) => `${i + 1}. ${msg}`).join('\n')}`;
     }
 
@@ -461,9 +461,9 @@ INPUT: "${input}"`;
 
     // Merge indicators
     const combinedIndicators = {
-      technical: [...new Set([...patternResults.indicators.technical, ...gptResults.indicators.technical])],
-      business: [...new Set([...patternResults.indicators.business, ...gptResults.indicators.business])],
-      hybrid: [...new Set([...patternResults.indicators.hybrid, ...gptResults.indicators.hybrid])]
+      technical: Array.from(new Set([...patternResults.indicators.technical, ...gptResults.indicators.technical])),
+      business: Array.from(new Set([...patternResults.indicators.business, ...gptResults.indicators.business])),
+      hybrid: Array.from(new Set([...patternResults.indicators.hybrid, ...gptResults.indicators.hybrid]))
     };
 
     // Merge alternatives

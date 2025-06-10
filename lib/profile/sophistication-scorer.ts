@@ -243,8 +243,8 @@ export class SophisticationScorer {
     }
 
     // Get role-specific terms
-    if (role && this.professionalTerminology[role]) {
-      professionalTerms = this.professionalTerminology[role];
+    if (role && role in this.professionalTerminology) {
+      professionalTerms = this.professionalTerminology[role as keyof typeof this.professionalTerminology];
     }
 
     // Count matches
@@ -362,7 +362,7 @@ INPUT: "${input}"`;
       user += `\n\nINDUSTRY CONTEXT: ${context.industry}`;
     }
 
-    if (context?.conversationHistory && context.conversationHistory.length > 0) {
+    if (context?.conversationHistory && Array.isArray(context.conversationHistory) && context.conversationHistory.length > 0) {
       user += `\n\nCONVERSATION HISTORY:\n${context.conversationHistory.slice(-2).map((msg, i) => `${i + 1}. ${msg}`).join('\n')}`;
     }
 
@@ -438,9 +438,9 @@ INPUT: "${input}"`;
 
     // Merge indicators
     const indicators = {
-      advanced: [...new Set([...domain.advancedMatches, ...gpt.indicators.advanced])],
-      intermediate: [...new Set([...domain.professionalMatches, ...gpt.indicators.intermediate])],
-      basic: [...new Set(gpt.indicators.basic)]
+      advanced: Array.from(new Set([...(domain.advancedMatches || []), ...(gpt.indicators.advanced || [])])) as string[],
+      intermediate: Array.from(new Set([...(domain.professionalMatches || []), ...(gpt.indicators.intermediate || [])])) as string[],
+      basic: Array.from(new Set(gpt.indicators.basic || [])) as string[]
     };
 
     return {

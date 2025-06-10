@@ -299,7 +299,7 @@ export class ProfileDetector {
 
     // Update conversation history
     newProfile.conversationHistory = [
-      ...previousProfile.conversationHistory.slice(-10), // Keep last 10 messages
+      ...(previousProfile.conversationHistory || []).slice(-10), // Keep last 10 messages
       ...newProfile.conversationHistory
     ];
   }

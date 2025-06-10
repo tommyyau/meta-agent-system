@@ -147,7 +147,7 @@ export class IndustryClassifier {
 
     // Score each industry based on keyword matches
     Object.entries(INDUSTRY_KEYWORDS).forEach(([industry, keywords]) => {
-      keywords.forEach(keyword => {
+      keywords.forEach((keyword: string) => {
         if (inputLower.includes(keyword.toLowerCase())) {
           industryScores[industry as Industry]++;
           foundKeywords[industry as Industry].push(keyword);
@@ -325,7 +325,7 @@ INPUT: "${input}"`;
     }
 
     // Combine keywords from both methods
-    const allKeywords = [...new Set([...keywordResults.keywords, ...gptResults.keywords])];
+    const allKeywords = Array.from(new Set([...keywordResults.keywords, ...gptResults.keywords]));
 
     // Merge alternative classifications
     const alternatives = [
