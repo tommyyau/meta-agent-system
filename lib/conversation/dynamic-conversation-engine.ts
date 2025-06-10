@@ -5,8 +5,9 @@
  * Replaces static question banks with dynamic, context-aware question generation.
  */
 
-import { openai } from '@/lib/openai/client'
+import { openai } from '../openai/client'
 import { EnhancedResponseAnalyzer, type EnhancedResponseAnalysis } from './response-analyzer'
+import { DomainQuestionGenerator } from './domain-question-generator'
 import type { 
   ConversationContext, 
   ConversationResponse, 
@@ -17,13 +18,14 @@ import type {
   ConversationExchange,
   SophisticationLevel,
   EngagementLevel
-} from '@/lib/types/conversation'
+} from '../types/conversation'
 
 export class DynamicConversationEngine {
   private readonly model: string
   private readonly maxTokens: number
   private readonly temperature: number
   private readonly responseAnalyzer: EnhancedResponseAnalyzer
+  private readonly domainQuestionGenerator: DomainQuestionGenerator
 
   constructor(
     model: string = 'gpt-4o-mini',
@@ -34,10 +36,28 @@ export class DynamicConversationEngine {
     this.maxTokens = maxTokens
     this.temperature = temperature
     this.responseAnalyzer = new EnhancedResponseAnalyzer(model)
+    this.domainQuestionGenerator = new DomainQuestionGenerator(model)
   }
 
   /**
-   * Generate the next optimal question based on conversation context
+   * Generate the next optimal question with enhanced domain-specific context
+   */
+  async generateNextQuestionEnhanced(
+    context: ConversationContext,
+    responseAnalysis: EnhancedResponseAnalysis
+  ): Promise<QuestionGenerationResult> {
+    try {
+      // Use the domain question generator for enhanced domain-specific questions
+      return await this.domainQuestionGenerator.generateDomainQuestion(context, responseAnalysis)
+    } catch (error) {
+      console.error('Error in enhanced question generation, falling back to basic generation:', error)
+      // Fallback to basic question generation
+      return await this.generateNextQuestion(context)
+    }
+  }
+
+  /**
+   * Generate the next optimal question based on conversation context (basic version)
    */
   async generateNextQuestion(
     context: ConversationContext

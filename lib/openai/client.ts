@@ -1,5 +1,5 @@
 import OpenAI from 'openai'
-import { openaiConfig, env } from '@/lib/config/environment'
+import { openaiConfig, env } from '../config/environment'
 
 // OpenAI client configuration
 const openai = new OpenAI({

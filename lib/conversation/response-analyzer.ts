@@ -9,7 +9,7 @@
  * - Learning pattern recognition and adaptation recommendations
  */
 
-import { openai } from '@/lib/openai/client'
+import { openai } from '../openai/client'
 import type { 
   ConversationContext,
   ConversationResponse,
@@ -17,7 +17,7 @@ import type {
   Domain,
   SophisticationLevel,
   EngagementLevel
-} from '@/lib/types/conversation'
+} from '../types/conversation'
 
 export interface EnhancedResponseAnalysis extends ConversationResponse {
   // Enhanced sophistication analysis

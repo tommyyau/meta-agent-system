@@ -6,7 +6,7 @@ import {
   QuestionResponse, 
   ConversationMetrics,
   IConversationStateManager 
-} from '@/lib/types/conversation';
+} from '../types/conversation';
 
 /**
  * In-memory conversation state manager for MVP
@@ -194,7 +194,12 @@ export class ConversationStateManager implements IConversationStateManager {
       averageResponseTime,
       completionRate,
       escapeRate,
-      stageCompletionRates
+      stageCompletionRates,
+      totalQuestions: Array.from(state.stageProgresses.values()).reduce((sum, p) => sum + p.totalQuestions, 0),
+      sophisticationProgression: [], // TODO: track sophistication over time
+      engagementTrend: [], // TODO: track engagement over time
+      escapeSignalCount: state.escapeTriggered ? 1 : 0,
+      assumptionAccuracy: 0.8 // TODO: track assumption accuracy
     };
   }
 
@@ -214,7 +219,12 @@ export class ConversationStateManager implements IConversationStateManager {
         averageResponseTime: 0,
         completionRate: 0,
         escapeRate: 0,
-        stageCompletionRates: new Map()
+        stageCompletionRates: new Map(),
+        totalQuestions: 0,
+        sophisticationProgression: [],
+        engagementTrend: [],
+        escapeSignalCount: 0,
+        assumptionAccuracy: 0
       };
     }
 
@@ -239,7 +249,12 @@ export class ConversationStateManager implements IConversationStateManager {
       averageResponseTime,
       completionRate,
       escapeRate,
-      stageCompletionRates
+      stageCompletionRates,
+      totalQuestions: filteredStates.reduce((sum, state) => sum + Array.from(state.stageProgresses.values()).reduce((s, p) => s + p.totalQuestions, 0), 0),
+      sophisticationProgression: [], // TODO: aggregate sophistication trends
+      engagementTrend: [], // TODO: aggregate engagement trends  
+      escapeSignalCount: filteredStates.filter(state => state.escapeTriggered).length,
+      assumptionAccuracy: 0.8 // TODO: aggregate assumption accuracy
     };
   }
 
