@@ -125,16 +125,11 @@ async function setupEnvironment() {
   config.OPENAI_TIMEOUT_SECONDS = await askQuestion('Request timeout (seconds)', '30')
   config.OPENAI_TEMPERATURE = await askQuestion('AI temperature (0-1)', '0.7')
 
-  // Database configuration
-  log.title('💾 Database Configuration')
-  config.NEXT_PUBLIC_SUPABASE_URL = await askQuestion('Supabase URL')
-  config.NEXT_PUBLIC_SUPABASE_ANON_KEY = await askQuestion('Supabase Anonymous Key')
-  config.SUPABASE_SERVICE_ROLE_KEY = await askQuestion('Supabase Service Role Key')
-
-  if (!config.NEXT_PUBLIC_SUPABASE_URL || !config.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-    log.warning('Supabase configuration incomplete')
-    log.info('Set up Supabase at: https://supabase.com/')
-  }
+  // Session storage (lightweight, in-memory)
+  log.title('💾 Session Configuration')
+  log.info('Using in-memory session storage for dynamic conversations')
+  config.SESSION_STORAGE = 'memory'
+  config.MAX_CONVERSATION_HISTORY = await askQuestion('Max conversation history items', '50')
 
   // Redis configuration
   log.title('🗄️ Cache Configuration')
@@ -189,11 +184,12 @@ async function setupEnvironment() {
   config.REDIS_SESSION_TTL = '86400'
   config.REDIS_CACHE_TTL = '3600'
 
-  // MongoDB (optional)
-  const enableMongoDB = await askYesNo('Configure MongoDB for analytics?', false)
-  if (enableMongoDB) {
-    config.MONGODB_URI = await askQuestion('MongoDB URI')
-    config.MONGODB_DB_NAME = await askQuestion('MongoDB Database Name', 'meta-agent-analytics')
+  // Conversation analytics (optional)
+  const enableAnalytics = await askYesNo('Enable conversation analytics?', false)
+  if (enableAnalytics) {
+    log.info('Analytics will be stored in Redis with configurable TTL')
+    config.ANALYTICS_ENABLED = 'true'
+    config.ANALYTICS_RETENTION_DAYS = await askQuestion('Analytics retention (days)', '30')
   }
 
   // Development tools
@@ -237,11 +233,7 @@ ${envContent}
   log.success(`Application URL: ${config.NEXTAUTH_URL}`)
   log.success(`OpenAI Model: ${config.OPENAI_MODEL_PRIMARY}`)
   
-  if (config.NEXT_PUBLIC_SUPABASE_URL) {
-    log.success('Database: Configured')
-  } else {
-    log.warning('Database: Not configured')
-  }
+  log.success('Session Storage: In-memory (dynamic conversations)')
   
   if (config.UPSTASH_REDIS_REST_URL) {
     log.success('Cache: Configured')
@@ -252,7 +244,7 @@ ${envContent}
   log.title('🎉 Setup Complete!')
   log.info('Next steps:')
   log.info('1. Review your .env.local file')
-  log.info('2. Set up any missing services (Supabase, Upstash, etc.)')
+  log.info('2. Set up any missing services (Upstash Redis, Resend, etc.)')
   log.info('3. Run: npm run dev')
   log.info('')
   log.info('For help, check: README.dev.md')

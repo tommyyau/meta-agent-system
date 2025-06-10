@@ -2,287 +2,272 @@
 
 This document defines the standardized repository structure and organization for the Meta-Agent System codebase.
 
+## 🎯 **System Architecture**
+
+The Meta-Agent System is a **dynamic conversation engine** using GPT-4 for intelligent, adaptive conversations:
+- **No traditional database** - In-memory sessions with Redis caching
+- **Dynamic question generation** - No static question banks  
+- **Real-time adaptation** - Responds to user sophistication and escape signals
+- **Professional wireframe output** - From conversation insights
+
 ## Directory Structure Overview
 
 ```
 meta-agent-system/
 ├── app/                          # Next.js 13+ App Router
-│   ├── (auth)/                   # Route groups for authentication
-│   ├── (dashboard)/              # Route groups for dashboard
+│   ├── (conversation)/           # Route groups for conversation flows
+│   ├── (wireframes)/             # Route groups for wireframe generation
 │   ├── api/                      # API route handlers
+│   │   ├── conversation/         # Dynamic conversation endpoints
+│   │   ├── profile/              # Profile detection endpoints
+│   │   ├── openai/               # OpenAI integration endpoints
+│   │   └── wireframes/           # Wireframe generation endpoints
 │   ├── globals.css               # Global styles
 │   ├── layout.tsx                # Root layout component
 │   └── page.tsx                  # Home page component
 ├── components/                   # Reusable UI components
 │   ├── ui/                       # Base UI components (buttons, inputs, etc.)
-│   ├── forms/                    # Form components
-│   ├── layout/                   # Layout components (header, sidebar, etc.)
-│   ├── agents/                   # Agent-specific components
-│   ├── conversation/             # Conversation flow components
-│   ├── wireframes/               # Wireframe generation components
-│   └── analytics/                # Analytics and monitoring components
-├── lib/                          # Utility libraries and configurations
+│   ├── conversation/             # Dynamic conversation components
+│   │   ├── ConversationFlow.tsx  # Main conversation orchestrator
+│   │   ├── QuestionDisplay.tsx   # Dynamic question rendering
+│   │   ├── ResponseInput.tsx     # User response capture
+│   │   └── ProgressTracker.tsx   # Conversation stage tracking
+│   ├── assumptions/              # Assumption display and editing
+│   ├── wireframes/               # Wireframe generation and display
+│   ├── profile/                  # Profile detection UI
+│   └── analytics/                # Conversation analytics (optional)
+├── lib/                          # Core system libraries
 │   ├── types/                    # TypeScript type definitions
-│   ├── utils/                    # General utility functions
-│   ├── validations/              # Zod schemas and validations
-│   ├── api/                      # API client functions
-│   ├── auth/                     # Authentication utilities
-│   ├── database/                 # Database utilities and queries
-│   ├── openai/                   # OpenAI integration utilities
-│   ├── agents/                   # Agent management utilities
-│   └── constants/                # Application constants
-├── hooks/                        # Custom React hooks
-│   ├── use-auth.ts               # Authentication hooks
-│   ├── use-agents.ts             # Agent management hooks
-│   ├── use-conversation.ts       # Conversation flow hooks
-│   └── use-analytics.ts          # Analytics hooks
-├── services/                     # Business logic and external services
-│   ├── auth/                     # Authentication services
-│   ├── agents/                   # Agent creation and management
-│   ├── conversation/             # Conversation flow management
-│   ├── profiling/                # User profiling services
-│   ├── assumptions/              # Assumption generation services
-│   ├── wireframes/               # Wireframe generation services
-│   ├── analytics/                # Analytics and tracking services
-│   └── integrations/             # External service integrations
-├── database/                     # Database schemas and migrations
-│   ├── migrations/               # Database migration files
-│   ├── schemas/                  # Database schema definitions
-│   ├── seeds/                    # Database seed data
-│   └── types/                    # Database type definitions
+│   │   ├── conversation.ts       # Conversation flow types
+│   │   ├── profile.ts            # User profile types
+│   │   ├── agent-types.ts        # Agent template types
+│   │   └── assumptions.ts        # Assumption generation types
+│   ├── conversation/             # Conversation management
+│   │   ├── state-manager.ts      # Session state tracking
+│   │   ├── dynamic-generator.ts  # GPT-4 question generation
+│   │   └── escape-detector.ts    # Escape signal detection
+│   ├── profile/                  # Profile detection system
+│   │   ├── profile-detector.ts   # Main profile analysis
+│   │   ├── industry-classifier.ts # Industry detection
+│   │   ├── role-detector.ts      # Role classification
+│   │   └── sophistication-scorer.ts # Sophistication assessment
+│   ├── agents/                   # Agent template management
+│   │   ├── template-manager.ts   # Agent template CRUD
+│   │   ├── deployment-manager.ts # Agent deployment
+│   │   └── domain-expertise.ts   # Domain-specific prompts
+│   ├── openai/                   # OpenAI API integration
+│   │   ├── client.ts             # OpenAI client with rate limiting
+│   │   ├── cost-monitor.ts       # Cost tracking and budgets
+│   │   └── prompt-templates.ts   # Dynamic prompt generation
+│   ├── assumptions/              # Assumption generation
+│   │   ├── generator.ts          # Context-aware assumption creation
+│   │   └── cascade-updater.ts    # Dependency tracking
+│   ├── wireframes/               # Wireframe generation
+│   │   ├── generator.ts          # Professional wireframe creation
+│   │   └── exporter.ts           # Multiple format export
+│   ├── auth/                     # Lightweight authentication
+│   ├── config/                   # Environment configuration
+│   └── utils/                    # General utilities
+├── services/                     # Business logic services (lightweight)
+│   ├── conversation-service.ts   # Conversation orchestration
+│   ├── profile-service.ts        # Profile detection service
+│   ├── assumption-service.ts     # Assumption management
+│   └── analytics-service.ts      # Optional conversation analytics
 ├── tests/                        # Test files
 │   ├── unit/                     # Unit tests
+│   │   ├── conversation/         # Conversation logic tests
+│   │   ├── profile/              # Profile detection tests
+│   │   └── openai/               # OpenAI integration tests
 │   ├── integration/              # Integration tests
-│   ├── e2e/                      # End-to-end tests
-│   ├── fixtures/                 # Test data and fixtures
-│   └── utils/                    # Test utilities
+│   │   ├── conversation-flow.test.ts # End-to-end conversation tests
+│   │   └── agent-deployment.test.ts  # Agent template tests
+│   ├── e2e/                      # Browser automation tests
+│   └── fixtures/                 # Test data and mocks
 ├── docs/                         # Documentation
-│   ├── api/                      # API documentation
-│   ├── architecture/             # Architecture documentation
-│   ├── deployment/               # Deployment guides
-│   └── user-guide/               # User guides
-├── scripts/                      # Build and deployment scripts
-│   ├── build/                    # Build scripts
-│   ├── deployment/               # Deployment scripts
-│   ├── database/                 # Database utility scripts
-│   └── development/              # Development utility scripts
-├── config/                       # Configuration files
+│   ├── ARCHITECTURE.md           # System architecture overview
+│   ├── CONVERSATION_FLOW.md      # Dynamic conversation documentation
+│   ├── PROFILE_DETECTION.md      # Profile detection algorithms
+│   └── DEPLOYMENT.md             # Deployment guides
+├── scripts/                      # Development and testing scripts
+│   ├── test-openai.js            # OpenAI API integration test
+│   ├── test-conversation-state.js # Conversation flow testing
+│   ├── test-profile-detection.js # Profile detection testing
+│   ├── setup-env.js              # Interactive environment setup
+│   ├── validate-env.js           # Environment validation
+│   └── debug-profile.js          # Profile detection debugging
+├── config/                       # Configuration management
 │   ├── environment.template      # Environment variable template
-│   ├── database.config.ts        # Database configuration
-│   ├── auth.config.ts            # Authentication configuration
-│   └── constants.ts              # Configuration constants
-├── infrastructure/               # Infrastructure and deployment
-│   ├── docker/                   # Docker configurations
+│   ├── environment.development.template # Development config
+│   ├── environment.production.template  # Production config
+│   └── conversation-stages.ts    # Conversation stage definitions
+├── infrastructure/               # Deployment infrastructure
 │   ├── vercel/                   # Vercel deployment configs
-│   ├── monitoring/               # Monitoring configurations
-│   └── deployment/               # Deployment configurations
-├── public/                       # Static assets
-│   ├── images/                   # Image assets
-│   ├── icons/                    # Icon assets
-│   ├── fonts/                    # Font files
-│   └── docs/                     # Public documentation
-└── ai-dev-tasks/                 # AI development task management
-    ├── process-task-list.mdc     # Task management guidelines
-    ├── create-prd.mdc            # PRD creation guidelines
-    └── generate-tasks.mdc        # Task generation guidelines
+│   ├── docker-compose.yml        # Redis for local development
+│   └── monitoring/               # Monitoring configurations
+└── public/                       # Static assets
+    ├── images/                   # Image assets
+    ├── icons/                    # Icon assets
+    └── examples/                 # Example wireframes and conversations
+```
+
+## 🗑️ **What We DON'T Have (By Design)**
+
+### No Traditional Database Infrastructure
+- ❌ `database/` directory - No PostgreSQL/MySQL schemas
+- ❌ `migrations/` - No database migrations
+- ❌ `seeds/` - No static data seeding
+- ❌ Database ORMs (Prisma, TypeORM) - Not needed
+- ❌ Question banks tables - Dynamic generation instead
+
+### No Static Content Management
+- ❌ `lib/data/` directory - No static question files
+- ❌ Question bank APIs - Dynamic conversation instead
+- ❌ Static wireframe templates - Generated from conversations
+- ❌ Predetermined conversation flows - Adaptive based on user
+
+## 🏗️ **Core Architecture Patterns**
+
+### 1. Dynamic Conversation Engine
+```typescript
+// lib/conversation/dynamic-generator.ts
+export class DynamicConversationEngine {
+  async generateNextQuestion(context: ConversationContext): Promise<Question>
+  async analyzeResponse(response: string): Promise<ResponseAnalysis>
+  async detectEscapeSignals(context: ConversationContext): Promise<boolean>
+}
+```
+
+### 2. Profile Detection System
+```typescript
+// lib/profile/profile-detector.ts  
+export class ProfileDetector {
+  async detectIndustry(text: string): Promise<IndustryClassification>
+  async detectRole(text: string): Promise<RoleClassification>
+  async scoreSophistication(text: string): Promise<SophisticationScore>
+}
+```
+
+### 3. Session Management (In-Memory)
+```typescript
+// lib/conversation/state-manager.ts
+export class ConversationStateManager {
+  async createSession(userId: string): Promise<ConversationSession>
+  async updateContext(sessionId: string, context: Partial<ConversationContext>): Promise<void>
+  async getHistory(sessionId: string): Promise<ConversationHistory>
+}
 ```
 
 ## File Organization Principles
 
-### 1. Feature-Based Organization
-- Group related functionality together
-- Maintain clear separation of concerns
-- Enable easy navigation and discovery
+### 1. Conversation-Centric Organization
+- Everything organized around dynamic conversation flow
+- Clear separation between static UI and dynamic logic
+- AI integration as first-class citizen
 
 ### 2. Layer-Based Architecture
-- **app/**: Presentation layer (Next.js routes and pages)
-- **components/**: UI layer (reusable React components)
-- **services/**: Business logic layer
-- **lib/**: Utility layer (helpers, configurations)
-- **database/**: Data layer (schemas, migrations)
+- **app/**: Presentation layer (Next.js routes)
+- **components/**: UI layer (conversation-focused components)
+- **lib/**: Core conversation logic and AI integration
+- **services/**: Business orchestration (lightweight)
+- **No database layer**: In-memory + Redis only
 
 ### 3. Import Path Structure
-Use absolute imports with path mapping configured in `tsconfig.json`:
-
 ```typescript
-// Import examples
-import { Button } from '@/components/ui/button'
-import { userProfileService } from '@/services/profiling'
-import { UserProfile } from '@/lib/types/user'
-import { validateUserInput } from '@/lib/validations/user'
+// Dynamic conversation imports
+import { DynamicConversationEngine } from '@/lib/conversation/dynamic-generator'
+import { ProfileDetector } from '@/lib/profile/profile-detector'
+import { OpenAIClient } from '@/lib/openai/client'
+import { ConversationStateManager } from '@/lib/conversation/state-manager'
+
+// UI component imports
+import { ConversationFlow } from '@/components/conversation/ConversationFlow'
+import { QuestionDisplay } from '@/components/conversation/QuestionDisplay'
 ```
 
 ## Directory Responsibilities
 
-### `/app` - Next.js App Router
-- **Route Groups**: Use parentheses for route organization without affecting URL structure
-- **API Routes**: RESTful API endpoints in `/app/api`
-- **Layouts**: Shared layouts for different sections
-- **Pages**: Route-specific page components
+### `/lib/conversation` - Dynamic Conversation Engine
+- **Real-time question generation** using GPT-4
+- **Context-aware conversation flow** management
+- **Escape signal detection** and response
+- **Session state management** (in-memory)
 
-### `/components` - React Components
-- **ui/**: Atomic design components (buttons, inputs, cards)
-- **forms/**: Complex form components with validation
-- **layout/**: Application layout components
-- **Feature folders**: Components specific to business features
+### `/lib/profile` - Profile Detection System
+- **Industry classification** with high accuracy
+- **Role detection** (technical/business/hybrid)
+- **Sophistication scoring** based on language patterns
+- **Real-time profile refinement** during conversation
 
-### `/services` - Business Logic
-- **Pure functions**: Stateless business logic
-- **External integrations**: Third-party service wrappers
-- **Domain services**: Feature-specific business operations
+### `/lib/openai` - AI Integration
+- **GPT-4 API client** with rate limiting and cost monitoring
+- **Dynamic prompt generation** for different domains
+- **Error handling and fallbacks** for API failures
+- **Cost optimization** and budget management
 
-### `/lib` - Utilities and Configuration
-- **types/**: Shared TypeScript definitions
-- **utils/**: Pure utility functions
-- **validations/**: Schema validation using Zod
-- **constants/**: Application-wide constants
+### `/components/conversation` - Conversation UI
+- **Dynamic question rendering** with context
+- **Progressive conversation display** 
+- **Real-time assumption tracking**
+- **Escape hatch UI** with smart defaults
 
-### `/tests` - Testing
-- **Mirror structure**: Test files mirror the source structure
-- **Shared utilities**: Common test helpers and fixtures
-- **Test types**: Unit, integration, and E2E test separation
+### `/services` - Business Orchestration
+- **Lightweight coordination** between components
+- **No heavy business logic** (moved to lib/)
+- **API endpoint implementations**
+- **Optional analytics coordination**
 
-## Naming Conventions
+## 🧪 **Testing Strategy**
 
-### Files and Folders
-- **kebab-case**: For file and folder names (`user-profile.ts`)
-- **PascalCase**: For React component files (`UserProfile.tsx`)
-- **camelCase**: For utility functions and variables
-- **UPPER_CASE**: For constants and environment variables
-
-### Components
+### Unit Tests
 ```typescript
-// Component file: UserProfileForm.tsx
-export default function UserProfileForm() {
-  // Component implementation
-}
-
-// Named export for testing
-export { UserProfileForm }
+// Test dynamic conversation logic
+describe('DynamicConversationEngine', () => {
+  test('generates contextually appropriate questions', async () => {
+    // Test question generation based on context
+  })
+  
+  test('adapts to user sophistication level', async () => {
+    // Test sophistication-based adaptation
+  })
+})
 ```
 
-### Services
+### Integration Tests
 ```typescript
-// Service file: user-profile.service.ts
-export const userProfileService = {
-  create: async (data: UserProfileData) => { /* */ },
-  update: async (id: string, data: Partial<UserProfileData>) => { /* */ },
-  delete: async (id: string) => { /* */ },
-}
+// Test full conversation flows
+describe('Conversation Integration', () => {
+  test('complete user journey from start to wireframe', async () => {
+    // Test end-to-end conversation flow
+  })
+})
 ```
 
-### Types
-```typescript
-// Type file: user.types.ts
-export interface UserProfile {
-  id: string
-  industry: Industry
-  role: UserRole
-  sophistication: SophisticationLevel
-}
+## 🚀 **Development Commands**
 
-export type UserRole = 'technical' | 'business' | 'hybrid'
+### Core Testing
+```bash
+npm run test:conversation    # Test conversation logic
+npm run test:profile        # Test profile detection
+npm run test:openai         # Test OpenAI integration
+npm run test:services       # Test all services
 ```
 
-## Git Branching Strategy
-
-### Branch Types
-- **main**: Production-ready code
-- **develop**: Integration branch for features
-- **feature/**: New feature development
-- **bugfix/**: Bug fixes
-- **hotfix/**: Emergency production fixes
-- **release/**: Release preparation
-
-### Branch Naming Convention
-```
-feature/agent-profile-detection
-bugfix/conversation-flow-error
-hotfix/openai-api-timeout
-release/v1.0.0
+### Environment Management
+```bash
+npm run setup:env          # Interactive environment setup
+npm run validate:env       # Validate configuration
+npm run debug:env          # Debug environment issues
 ```
 
-### Workflow
-1. **Feature Development**:
-   ```bash
-   git checkout develop
-   git pull origin develop
-   git checkout -b feature/your-feature-name
-   # Make changes
-   git commit -m "feat: add feature description"
-   git push origin feature/your-feature-name
-   # Create PR to develop
-   ```
+## 🎯 **Key Principles**
 
-2. **Release Process**:
-   ```bash
-   git checkout develop
-   git checkout -b release/v1.0.0
-   # Final testing and bug fixes
-   git checkout main
-   git merge release/v1.0.0
-   git tag v1.0.0
-   git checkout develop
-   git merge release/v1.0.0
-   ```
-
-## Code Organization Best Practices
-
-### 1. Index Files
-Use `index.ts` files for clean imports:
-
-```typescript
-// components/ui/index.ts
-export { Button } from './button'
-export { Input } from './input'
-export { Card } from './card'
-
-// Usage
-import { Button, Input, Card } from '@/components/ui'
-```
-
-### 2. Barrel Exports
-Group related exports in barrel files:
-
-```typescript
-// services/index.ts
-export * from './auth'
-export * from './agents'
-export * from './conversation'
-```
-
-### 3. Feature Folders
-Organize complex features in dedicated folders:
-
-```
-features/
-├── conversation-flow/
-│   ├── components/
-│   ├── hooks/
-│   ├── services/
-│   ├── types/
-│   └── index.ts
-```
-
-## Quality Assurance
-
-### 1. Code Standards
-- **ESLint**: Enforce coding standards
-- **Prettier**: Consistent code formatting
-- **TypeScript**: Strong typing for better maintainability
-
-### 2. Testing Requirements
-- **Unit tests**: All utility functions and services
-- **Component tests**: All React components
-- **Integration tests**: API endpoints and workflows
-- **E2E tests**: Critical user journeys
-
-### 3. Documentation
-- **README files**: In each major directory
-- **Inline comments**: For complex business logic
-- **Type annotations**: Comprehensive TypeScript coverage
+1. **Dynamic Over Static**: Generate content in real-time vs pre-written content
+2. **Context-Aware**: Every decision based on conversation history and user profile
+3. **Lightweight Storage**: Minimal data persistence, maximum conversation intelligence
+4. **AI-First**: GPT-4 as the core conversation engine, not just a helper
+5. **Professional Output**: Investor-ready wireframes from natural conversations
 
 ---
 
-**Last Updated**: June 2025  
-**Version**: 1.0.0 
+**Last Updated**: December 2024  
+**Version**: 2.0.0 (Dynamic Conversation Architecture) 

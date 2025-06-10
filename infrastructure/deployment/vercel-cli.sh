@@ -43,20 +43,20 @@ set_env_vars() {
         vercel env add OPENAI_API_KEY $environment < <(echo "$OPENAI_API_KEY")
     fi
     
-    if [ -n "$DATABASE_URL" ]; then
-        vercel env add DATABASE_URL $environment < <(echo "$DATABASE_URL")
+    if [ -n "$UPSTASH_REDIS_REST_URL" ]; then
+        vercel env add UPSTASH_REDIS_REST_URL $environment < <(echo "$UPSTASH_REDIS_REST_URL")
     fi
     
-    if [ -n "$REDIS_URL" ]; then
-        vercel env add REDIS_URL $environment < <(echo "$REDIS_URL")
+    if [ -n "$UPSTASH_REDIS_REST_TOKEN" ]; then
+        vercel env add UPSTASH_REDIS_REST_TOKEN $environment < <(echo "$UPSTASH_REDIS_REST_TOKEN")
     fi
     
-    if [ -n "$SUPABASE_URL" ]; then
-        vercel env add SUPABASE_URL $environment < <(echo "$SUPABASE_URL")
+    if [ -n "$SESSION_STORAGE" ]; then
+        vercel env add SESSION_STORAGE $environment < <(echo "$SESSION_STORAGE")
     fi
     
-    if [ -n "$SUPABASE_ANON_KEY" ]; then
-        vercel env add SUPABASE_ANON_KEY $environment < <(echo "$SUPABASE_ANON_KEY")
+    if [ -n "$MAX_CONVERSATION_HISTORY" ]; then
+        vercel env add MAX_CONVERSATION_HISTORY $environment < <(echo "$MAX_CONVERSATION_HISTORY")
     fi
     
     if [ -n "$NEXTAUTH_SECRET" ]; then
@@ -203,8 +203,8 @@ case "${1:-setup}" in
         echo "  status        - Show project status"
         echo ""
         echo -e "${YELLOW}Environment variables to set before running:${NC}"
-        echo "  OPENAI_API_KEY, DATABASE_URL, REDIS_URL, SUPABASE_URL,"
-        echo "  SUPABASE_ANON_KEY, NEXTAUTH_SECRET, CUSTOM_DOMAIN"
+        echo "  OPENAI_API_KEY, UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN,"
+        echo "  SESSION_STORAGE, MAX_CONVERSATION_HISTORY, NEXTAUTH_SECRET, CUSTOM_DOMAIN"
         exit 1
         ;;
 esac

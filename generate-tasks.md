@@ -1,10 +1,65 @@
 # Task Generation Document
 ## Meta-Agent System: Development Tasks & Implementation Plan
 
-**Version:** 1.0  
-**Date:** 9 June 2025  
+**Version:** 2.0  
+**Date:** 10Thank you.  June 2025  
 **Based on:** Meta-Agent System PRD v1.0  
 **Status:** Development Ready  
+
+---
+
+## 0. COURSE CORRECTION: From Static to Dynamic Conversation (10 June 2024)
+
+### 0.1 Critical Learning & Pivot
+
+**What We Initially Built Wrong:**
+- ❌ Static question banks with 50+ pre-written questions per domain
+- ❌ Database-driven question storage and retrieval
+- ❌ Stage-based filtering of predetermined questions
+- ❌ Separate systems for questioning, escape detection, and assumption generation
+
+**What We Learned:**
+The original vision was always about **dynamic, adaptive conversation** that responds to user sophistication and engagement in real-time. Building static question banks completely missed the point of intelligent, contextual interaction.
+
+**Course Correction Applied:**
+- ✅ **TASK-005:** Completely rewritten from "Question Banks" to "Dynamic Conversation Engine"
+- ✅ **TASK-006:** Integrated escape detection into conversation flow (no separate system)
+- ✅ **TASK-007:** Context-aware assumption generation based on conversation history
+- ✅ **TASK-008D:** Domain expertise through LLM prompts, not static content
+
+**New Core Architecture:**
+```
+User Input → LLM Analysis → Dynamic Question Generation → Context Update
+     ↓
+Sophistication Assessment + Escape Detection + Domain Expertise
+     ↓
+Next Question OR Assumption Generation (seamless pivot)
+```
+
+**Key Insight:** The system should feel like talking to a domain expert who adapts their questioning style based on your responses, not like filling out a survey.
+
+### 0.2 Implementation Status & Next Steps
+
+**Files Created During Wrong Approach (Static Question Banks):**
+- ✅ `lib/data/fintech-questions.ts` - 35 manually written fintech questions
+- ✅ `lib/data/healthcare-questions.ts` - 16 LLM-generated healthcare questions  
+- ✅ `scripts/generate-healthcare-questions-simple.js` - LLM question generator
+- ✅ `app/api/questions/fintech/test/route.ts` - Fintech question testing API
+- ✅ `app/api/questions/healthcare/test/route.ts` - Healthcare question testing API
+
+**What These Files Taught Us:**
+- LLM-generated questions have superior domain expertise vs manual writing
+- Dynamic generation is faster and more scalable than static banks
+- Question quality analysis showed GPT-4 produces expert-level domain knowledge
+
+**Next Implementation Priority:**
+1. **Build TASK-005: Dynamic Conversation Engine** using lessons learned from LLM question generation
+2. **Integrate escape detection and assumption generation** into single conversation flow
+3. **Use domain expertise prompts** instead of static question databases
+4. **Test dynamic conversation** with real users to validate adaptive questioning
+
+**Recommended Approach:**
+Keep the test APIs and generated questions as **reference examples** for conversation quality, but build the actual system using dynamic LLM conversation as outlined in the updated TASK-005.
 
 ---
 
@@ -262,98 +317,143 @@ interface AgentTemplate {
 
 ---
 
-#### TASK-005: Domain-Specific Question Banks
-**Priority:** P1 | **Category:** CORE | **Effort:** 12 days | **Dependencies:** TASK-004
+#### TASK-005: Dynamic Conversation Engine
+**Priority:** P0 | **Category:** CORE | **Effort:** 15 days | **Dependencies:** TASK-004, TASK-003A
 
-**Description:** Create comprehensive question banks for 3 initial domains (fintech, healthcare, general)
+**Description:** Build intelligent conversation system that dynamically generates questions based on user responses, sophistication level, and domain expertise instead of using static question banks
+
+**Core Vision:**
+- **Adaptive Questioning:** LLM analyzes each user response and generates the next optimal question
+- **Real-time Sophistication Assessment:** Adjusts questioning complexity based on user's demonstrated expertise  
+- **Escape Signal Detection:** Recognizes boredom/impatience and pivots to assumption generation
+- **Context-Aware Domain Expertise:** Uses domain-specific prompts and terminology appropriately
 
 **Deliverables:**
-- [ ] Fintech question bank (50+ questions)
-- [ ] Healthcare question bank (50+ questions)  
-- [ ] General business question bank (40+ questions)
-- [ ] Question categorization and tagging system
-- [ ] Adaptive questioning logic
-- [ ] Question relevance scoring
+- [ ] LLM-powered conversation orchestrator using OpenAI GPT-4
+- [ ] Real-time response analysis system (sophistication, clarity, engagement)
+- [ ] Dynamic question generation with domain-specific context
+- [ ] Adaptive questioning style (novice vs expert vs impatient)
+- [ ] Escape signal detection and assumption pivot logic
+- [ ] Conversation context preservation across interactions
+- [ ] Domain expertise prompt templates (fintech, healthcare, general)
 
 **Acceptance Criteria:**
-- Each domain has comprehensive question coverage
-- Questions use appropriate domain terminology
-- Adaptive logic reduces redundant questions
-- Question flow feels natural and conversational
-- Edge cases and corner scenarios covered
+- System generates contextually appropriate next questions based on user responses
+- Questioning style adapts in real-time based on detected user sophistication
+- Escape signals ("I'm bored", "just proceed") trigger smooth assumption generation
+- Domain expertise is demonstrated through appropriate terminology usage
+- Conversation feels natural and intelligent, not scripted
+- Context is preserved and built upon throughout the conversation
 
-**Domain-Specific Requirements:**
+**Dynamic Question Generation Examples:**
 
-**Fintech Questions:**
-- Regulatory compliance focus (PCI DSS, SOC2, etc.)
-- B2B vs B2C distinction
-- Payment processing vs other financial services
-- Security and audit requirements
+**Novice User Response:** "I want to build a fintech app"
+→ **Generated Question:** "What specific financial problem are you trying to solve for your users?"
 
-**Healthcare Questions:**
-- HIPAA compliance requirements
-- Provider vs patient vs admin targeting
-- EHR integration needs
-- Clinical workflow optimization
+**Expert User Response:** "I'm building a regulatory reporting solution for mid-market banks"
+→ **Generated Question:** "Which specific compliance frameworks are you targeting - SOC2, PCI DSS, or regulatory reporting like BSA/AML?"
+
+**Impatient User:** "This is taking too long, just show me something"
+→ **System Response:** "I understand! Let me generate smart assumptions based on what you've told me..."
+
+**Technical Implementation:**
+- OpenAI GPT-4 conversation analysis with custom prompts per domain
+- Response sophistication scoring (terminology usage, specificity, technical depth)
+- Conversation context accumulation and intelligent questioning chains
+- Real-time escape signal detection using sentiment analysis
+- Dynamic prompt engineering for domain expertise demonstration
 
 ---
 
 ### 2.3 Escape Hatch System (Basic)
 
-#### TASK-006: Escape Phrase Detection
-**Priority:** P1 | **Category:** CORE | **Effort:** 5 days | **Dependencies:** TASK-005
+#### TASK-006: Integrated Response Analysis & Escape Detection
+**Priority:** P1 | **Category:** CORE | **Effort:** 8 days | **Dependencies:** TASK-005
 
-**Description:** Implement real-time detection of user escape triggers
+**Description:** Build comprehensive user response analysis system that detects sophistication, engagement, and escape signals as part of the dynamic conversation flow
+
+**Core Integration:**
+- **Built into TASK-005:** No longer a separate system, but integrated into dynamic conversation engine
+- **Multi-dimensional Analysis:** Sophistication, clarity, engagement, and escape signals analyzed simultaneously
+- **Seamless Transitions:** Natural pivot from questioning to assumption generation when escape detected
 
 **Deliverables:**
-- [ ] Escape phrase detection engine
-- [ ] Context-aware trigger analysis
-- [ ] Sentiment analysis for frustration detection
-- [ ] Escape trigger classification
-- [ ] Response time optimization
-- [ ] False positive handling
+- [ ] Integrated response analysis within conversation engine (part of TASK-005)
+- [ ] Multi-signal detection: sophistication + engagement + escape intent
+- [ ] Contextual escape signal interpretation ("I'm bored" vs "I'm an expert, skip basics")
+- [ ] Smooth assumption generation transition when escape detected
+- [ ] Progressive questioning intensity based on user engagement
+- [ ] Fallback conversation paths for different user states
 
 **Acceptance Criteria:**
-- Detects 90%+ of clear escape phrases
-- Minimizes false positives (<5%)
-- Response time under 500ms
-- Works across different conversation stages
-- Handles ambiguous cases appropriately
+- Response analysis detects multiple signals simultaneously (sophistication, engagement, escape)
+- System distinguishes between different types of escape signals (boredom vs expertise)
+- Transitions to assumptions feel natural and maintain user control
+- No jarring switches between questioning and assumption modes
+- Users can re-engage with questioning after assumption generation if desired
 
-**Escape Trigger Categories:**
-- Direct requests: "just proceed", "skip questions"
-- Impatience: "taking too long", "just show me"
-- Defaults: "use defaults", "make assumptions"
+**Enhanced Escape Signal Understanding:**
+- **Expert Impatience:** "I know this stuff, skip to technical details" → Advance to expert-level questions
+- **General Boredom:** "This is taking too long" → Generate assumptions with explanation
+- **Specific Requests:** "Just show me wireframes" → Generate assumptions and proceed to deliverables
+- **Confusion Signals:** "I'm not sure about any of this" → Simplify questioning or offer guided assistance
+
+**Technical Implementation:**
+- Integrated into TASK-005 conversation engine using OpenAI GPT-4 analysis
+- Multi-dimensional prompt engineering for simultaneous signal detection
+- Context-aware interpretation based on conversation history
+- Smooth state transitions within the conversation flow
 
 ---
 
-#### TASK-007: Basic Assumption Generation
-**Priority:** P1 | **Category:** CORE | **Effort:** 10 days | **Dependencies:** TASK-006, TASK-005, TASK-003A
+#### TASK-007: Context-Aware Assumption Generation
+**Priority:** P1 | **Category:** CORE | **Effort:** 12 days | **Dependencies:** TASK-005, TASK-006
 
-**Description:** Generate domain-specific assumptions when users trigger escape hatches using OpenAI GPT-4
+**Description:** Generate intelligent, context-aware assumptions based on conversation history and user sophistication level, seamlessly integrated with the dynamic conversation engine
+
+**Enhanced Assumption Strategy:**
+- **Conversation-Informed:** Uses all previous responses to generate contextually relevant assumptions
+- **Sophistication-Matched:** Generates technical assumptions for experts, business assumptions for founders
+- **Gap-Filling Intelligence:** Identifies exactly what information is missing vs what can be reasonably assumed
+- **Transparent Reasoning:** Clearly explains why each assumption was made and its impact
 
 **Deliverables:**
-- [ ] OpenAI-powered assumption generation engine for 3 domains
-- [ ] GPT-4 prompt engineering for domain-specific assumptions
-- [ ] Template-based assumption creation with AI enhancement
-- [ ] Confidence scoring algorithm
-- [ ] Assumption reasoning documentation
-- [ ] Impact explanation system
-- [ ] Assumption validation logic
+- [ ] Integrated assumption generation within conversation engine (extends TASK-005)
+- [ ] Conversation context analysis for assumption inference
+- [ ] Sophistication-matched assumption complexity and terminology
+- [ ] Intelligent gap identification (what's missing vs what's assumable)
+- [ ] Dynamic assumption confidence scoring based on available context
+- [ ] Clear assumption reasoning and impact explanation
+- [ ] User assumption validation and correction interface
+- [ ] Assumption dependency tracking for downstream wireframe generation
 
 **Acceptance Criteria:**
-- Generates contextually relevant assumptions per domain
-- Confidence scores correlate with user acceptance
-- Reasoning is clear and understandable
-- Impact explanations help users understand consequences
-- Assumptions cover all required information categories
+- Assumptions are contextually relevant based on full conversation history
+- Assumption complexity matches user's demonstrated sophistication level
+- System clearly explains reasoning behind each assumption
+- Users can easily validate, modify, or reject assumptions
+- Assumptions provide sufficient information for wireframe generation
+- Missing critical information is clearly identified vs reasonable assumptions
 
-**Assumption Categories per Domain:**
-- Target User Demographics
-- Core Problem Definition
-- Primary Workflow Steps
-- Technical Requirements
-- Success Metrics
+**Smart Assumption Examples:**
+
+**Expert Fintech User Context:** "Regulatory reporting for mid-market banks"
+→ **Generated Assumptions:**
+- Target Users: Compliance officers and risk managers at banks with $1B-$50B assets
+- Technical Requirements: SOC2 compliance, API integration with core banking systems
+- Deployment: Cloud-based SaaS with on-premise data connectors for security
+
+**Novice Healthcare User Context:** "Help doctors with patient data"
+→ **Generated Assumptions:**
+- Target Users: Primary care physicians in small to medium practices
+- Technical Requirements: HIPAA compliance, simple web-based interface
+- Core Problem: Reducing administrative burden and improving patient care efficiency
+
+**Technical Implementation:**
+- Extends TASK-005 conversation engine with assumption generation capabilities
+- Context-aware GPT-4 prompting using full conversation history
+- Sophistication-matched assumption complexity and terminology
+- Transparent reasoning generation and impact analysis
 
 ---
 
@@ -482,54 +582,59 @@ interface AgentTemplate {
 
 ---
 
-#### TASK-008D: Multi-Domain Agent Expansion
-**Priority:** P1 | **Category:** ENHANCE | **Effort:** 18 days | **Dependencies:** TASK-005
+#### TASK-008D: Multi-Domain Conversation Expertise
+**Priority:** P1 | **Category:** ENHANCE | **Effort:** 12 days | **Dependencies:** TASK-005
 
-**Description:** Expand from 3 to 7 domain-specific agents for comprehensive market coverage
+**Description:** Expand dynamic conversation engine to demonstrate expert-level domain knowledge across 7 industries through sophisticated prompt engineering and domain-specific context
+
+**Domain Intelligence Strategy:**
+- **No Static Question Banks:** All domain expertise embedded in dynamic conversation prompts
+- **Expert-Level Domain Knowledge:** Deep industry terminology, common problems, and best practices
+- **Context-Aware Domain Switching:** Automatically adapts conversation style based on detected industry
+- **Cross-Domain Pattern Recognition:** Identifies when concepts apply across multiple domains
 
 **Deliverables:**
-- [ ] E-commerce agent (B2C/B2B marketplace focus, 60+ questions)
-- [ ] SaaS/B2B agent (Enterprise software focus, 60+ questions)
-- [ ] Consumer App agent (Mobile-first, social features, 50+ questions)
-- [ ] Enterprise Software agent (Workflow automation, 55+ questions)
-- [ ] Enhanced domain-specific assumption templates
-- [ ] Cross-domain question sharing and optimization
+- [ ] Domain expertise prompt libraries for 7 industries (extends TASK-005)
+- [ ] Industry-specific terminology and concept databases
+- [ ] Cross-domain pattern recognition and concept mapping
+- [ ] Expert-level conversation flows for each domain
+- [ ] Domain-specific assumption generation templates
+- [ ] Industry best practice and common pitfall knowledge integration
 
 **Acceptance Criteria:**
-- Each new domain has comprehensive question coverage
-- Domain expertise clearly demonstrated in questioning
-- Assumption quality matches domain expert level
-- Cross-domain optimization reduces redundancy
+- Conversations demonstrate expert-level knowledge in each domain
+- Domain expertise is contextually appropriate and not overwhelming
+- System recognizes cross-domain concepts and avoids redundancy
+- Industry-specific assumptions reflect real-world domain expertise
+- Conversation adapts terminology and complexity to match domain norms
 
-**New Domain Requirements:**
+**Domain Expertise Integration:**
 
-**E-commerce Agent:**
-- B2C vs B2B2C vs Marketplace models
-- Payment processing and fraud prevention
-- Inventory management and logistics
-- Mobile commerce optimization
-- Customer acquisition and retention
+**E-commerce Expertise:**
+- Business model nuances: B2C vs B2B2C vs Marketplace vs D2C
+- Payment and fraud considerations, inventory management complexity
+- Mobile commerce optimization, customer acquisition strategies
 
-**SaaS/B2B Agent:**
-- Enterprise vs SMB targeting
-- API-first architecture requirements
-- Integration and security protocols
-- Pricing and packaging strategies
-- Customer success and onboarding
+**SaaS/B2B Expertise:**
+- Enterprise vs SMB targeting, API-first architecture patterns
+- Integration and security protocols, pricing and packaging strategies
+- Customer success and onboarding, retention and expansion strategies
 
-**Consumer App Agent:**
-- Mobile-first design principles
-- Social features and viral mechanisms
-- App store optimization
-- User engagement and retention
-- Monetization strategies (freemium, ads, subscriptions)
+**Consumer App Expertise:**
+- Mobile-first design principles, social and viral mechanisms
+- App store optimization, user engagement and retention
+- Monetization strategies (freemium, ads, subscriptions, in-app purchases)
 
-**Enterprise Software Agent:**
-- Workflow automation and efficiency
-- Change management and adoption
-- Security and compliance requirements
-- Integration with existing systems
-- ROI measurement and reporting
+**Enterprise Software Expertise:**
+- Workflow automation and efficiency gains, change management
+- Security and compliance requirements, legacy system integration
+- ROI measurement and reporting, procurement and decision-making processes
+
+**Technical Implementation:**
+- Extends TASK-005 conversation engine with domain-specific prompt libraries
+- Industry knowledge embedded in GPT-4 prompts rather than static databases
+- Context-aware domain detection and appropriate expertise application
+- Cross-domain concept mapping for users building solutions spanning multiple industries
 
 ---
 

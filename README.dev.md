@@ -2,6 +2,16 @@
 
 This document provides comprehensive instructions for setting up a standardized development environment for the Meta-Agent System.
 
+## 🎯 **System Overview**
+
+The Meta-Agent System is a **dynamic conversation engine** that uses GPT-4 to conduct intelligent, adaptive conversations with users. Instead of static question banks, the system:
+
+- **Dynamically generates questions** based on user responses and expertise level
+- **Adapts in real-time** to user sophistication (novice → expert → impatient)
+- **Detects escape signals** and pivots to assumption generation seamlessly  
+- **Uses in-memory session storage** with Redis caching (no traditional database)
+- **Generates professional wireframes** based on conversation insights
+
 ## Prerequisites
 
 ### Required Software
@@ -21,7 +31,7 @@ This document provides comprehensive instructions for setting up a standardized 
    ```
 
 3. **Git** - Latest stable version
-4. **Docker** (optional, for containerized development)
+4. **Docker** (optional, for Redis development)
 5. **VS Code** (recommended IDE with extensions)
 
 ## Environment Setup
@@ -38,22 +48,23 @@ npm install
 ### 2. Environment Configuration
 
 ```bash
-# Copy environment template
-cp config/environment.template .env.local
+# Interactive environment setup (recommended)
+npm run setup:env
 
-# Edit .env.local with your API keys and configuration
-# See config/environment.template for required variables
+# Or manually copy template
+cp config/environment.template .env.local
 ```
 
 #### Required Environment Variables
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `OPENAI_API_KEY` | OpenAI API key for AI features | `sk-...` |
-| `SUPABASE_URL` | Supabase project URL | `https://xxx.supabase.co` |
-| `SUPABASE_ANON_KEY` | Supabase anonymous key | `eyJ...` |
-| `UPSTASH_REDIS_REST_URL` | Redis cache URL | `https://xxx.upstash.io` |
-| `NEXTAUTH_SECRET` | NextAuth secret key | Random string |
+| `OPENAI_API_KEY` | OpenAI API key for dynamic conversations | `sk-...` |
+| `UPSTASH_REDIS_REST_URL` | Redis cache URL for sessions | `https://xxx.upstash.io` |
+| `UPSTASH_REDIS_REST_TOKEN` | Redis authentication token | `AXXXaaa...` |
+| `NEXTAUTH_SECRET` | NextAuth secret key | Random 32+ char string |
+| `SESSION_STORAGE` | Session storage type | `memory` |
+| `MAX_CONVERSATION_HISTORY` | Max conversation items | `50` |
 
 ### 3. Development Scripts
 
@@ -63,7 +74,7 @@ npm run dev
 
 # Run tests
 npm test                 # All tests
-npm run test:unit       # Unit tests only
+npm run test:unit       # Unit tests only  
 npm run test:integration # Integration tests
 npm run test:e2e        # End-to-end tests
 
@@ -73,10 +84,45 @@ npm run format          # Prettier formatting
 npm run format:check    # Check formatting
 npm run type-check      # TypeScript type checking
 
-# Database and services
-npm run docker:dev      # Start local services (Redis, etc.)
-npm run docker:down     # Stop local services
+# System tests
+npm run test:openai     # Test OpenAI integration
+npm run test:conversation # Test conversation state management
+npm run test:profile    # Test profile detection
+npm run test:services   # Test all services
+
+# Environment validation
+npm run validate:env    # Validate all environment variables
+npm run debug:env      # Debug environment configuration
 ```
+
+## 🏗️ **Architecture Overview**
+
+### Dynamic Conversation Flow
+
+```
+User Input → GPT-4 Analysis → Dynamic Question Generation → Context Update
+     ↓
+Profile Detection + Sophistication Assessment + Escape Detection  
+     ↓
+Next Question OR Assumption Generation (seamless pivot)
+     ↓
+Professional Wireframe Generation
+```
+
+### Core Components
+
+- **Dynamic Conversation Engine** (`lib/conversation/`) - Real-time question generation
+- **Profile Detection** (`lib/profile/`) - Industry, role, and sophistication analysis  
+- **Agent Templates** (`lib/agents/`) - Domain expertise prompts (no static data)
+- **Session Management** (`lib/conversation/state-manager.ts`) - In-memory conversation tracking
+- **OpenAI Integration** (`lib/openai/`) - GPT-4 API with rate limiting and cost monitoring
+
+### No Traditional Database
+
+- **Sessions**: In-memory storage with Redis caching
+- **Conversations**: Dynamic GPT-4 generation, no static question banks
+- **Analytics**: Optional Redis storage with configurable TTL
+- **User Data**: Lightweight session-based storage only
 
 ## Development Workflow
 
@@ -149,19 +195,19 @@ Create `.vscode/settings.json`:
 }
 ```
 
-## Testing Strategy
+## 🧪 **Testing Strategy**
 
 ### Unit Tests
-- Test individual functions and components
+- Test conversation logic and profile detection
 - Use Jest + React Testing Library
 - Minimum 80% coverage required
 
-### Integration Tests
-- Test API endpoints and database interactions
-- Use Jest with test database
+### Integration Tests  
+- Test OpenAI API integration and conversation flows
+- Use Jest with mocked external services
 
 ### E2E Tests
-- Test complete user workflows
+- Test complete user conversation journeys
 - Use Playwright for browser automation
 
 ### Running Tests
@@ -173,26 +219,45 @@ npm run test -- --watch
 # Coverage report
 npm run test:coverage
 
-# Specific test file
-npm test src/components/UserProfile.test.tsx
+# Test specific component
+npm test lib/profile/profile-detector.test.ts
+
+# Test OpenAI integration
+npm run test:openai
 ```
 
-## Docker Development (Optional)
+## 🚀 **Local Development**
 
-For containerized development:
+### Redis Development (Optional)
+
+For local Redis caching:
 
 ```bash
-# Start all services
+# Start Redis with Docker
 npm run docker:dev
 
 # View logs
-docker-compose -f infrastructure/docker-compose.yml logs -f
+docker-compose -f infrastructure/docker-compose.yml logs -f redis
 
 # Stop services
 npm run docker:down
 ```
 
-## Troubleshooting
+### Testing Dynamic Conversations
+
+```bash
+# Test conversation state management
+npm run test:conversation
+
+# Test profile detection accuracy
+npm run test:profile
+
+# Debug conversation flow
+npm run dev
+# Navigate to conversation endpoint in browser
+```
+
+## 🔧 **Troubleshooting**
 
 ### Common Issues
 
@@ -201,43 +266,54 @@ npm run docker:down
    nvm use  # Switches to correct version
    ```
 
-2. **Package installation issues**
+2. **OpenAI API issues**
    ```bash
-   rm -rf node_modules package-lock.json
-   npm install
+   npm run test:openai  # Test API connectivity
+   npm run validate:env # Check API key format
    ```
 
 3. **Environment variables not loading**
-   - Ensure `.env.local` exists and has correct format
-   - Restart development server after changes
+   ```bash
+   npm run validate:env  # Validate all required vars
+   npm run debug:env    # See current environment
+   ```
 
 4. **TypeScript errors**
    ```bash
    npm run type-check  # Check all TypeScript errors
    ```
 
+### Performance Monitoring
+
+- **OpenAI costs**: Monitor usage in environment setup
+- **Session memory**: Configure `MAX_CONVERSATION_HISTORY`
+- **Redis usage**: Optional analytics retention settings
+
 ### Getting Help
 
 - Check existing GitHub issues
-- Review project documentation
-- Ask in team Slack channel
-- Contact project maintainers
+- Review `generate-tasks.md` for implementation status
+- Test with `npm run test:services` 
+- Check OpenAI API key limits and billing
 
-## Performance Guidelines
+## 📊 **Key Differences from Static Systems**
 
-- Use React.memo() for expensive components
-- Implement proper loading states
-- Optimize images and assets
-- Monitor bundle size with `npm run build`
+| Traditional Approach | Our Dynamic Approach |
+|---------------------|---------------------|
+| Static question databases | GPT-4 dynamic generation |
+| Predetermined conversation flow | Adaptive based on user sophistication |
+| Separate escape detection | Integrated conversation analysis |
+| Database storage requirements | In-memory + Redis caching |
+| Manual question curation | AI-powered domain expertise |
 
-## Security Guidelines
+## 🎯 **Development Goals**
 
-- Never commit API keys or secrets
-- Use environment variables for sensitive data
-- Follow OWASP security practices
-- Regular dependency updates
+- **Conversation Quality**: Questions feel like talking to domain expert
+- **Response Adaptation**: Real-time sophistication assessment
+- **Seamless Transitions**: Natural pivots from questions to assumptions
+- **Professional Output**: Investor-ready wireframes from conversations
 
 ---
 
-**Last Updated**: June 2025  
-**Version**: 1.0.0 
+**Last Updated**: December 2024  
+**Version**: 2.0.0 (Dynamic Conversation Architecture) 
