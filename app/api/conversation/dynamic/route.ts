@@ -13,6 +13,10 @@ import type {
   UserProfile 
 } from '@/lib/types/conversation'
 
+// Configure runtime for longer OpenAI API calls
+export const runtime = 'nodejs'
+export const maxDuration = 30
+
 const conversationEngine = new DynamicConversationEngine()
 
 /**

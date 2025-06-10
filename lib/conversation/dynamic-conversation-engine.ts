@@ -9,6 +9,7 @@ import { openai } from '../openai/client'
 import { EnhancedResponseAnalyzer, type EnhancedResponseAnalysis } from './response-analyzer'
 import { DomainQuestionGenerator } from './domain-question-generator'
 import { AdaptiveQuestioningStyleEngine, type QuestioningStyle } from './adaptive-questioning-style'
+import { AssumptionGenerator, type AssumptionPivotResult, type AssumptionSet } from './assumption-generator'
 import type { 
   ConversationContext, 
   ConversationResponse, 
@@ -28,6 +29,7 @@ export class DynamicConversationEngine {
   private readonly responseAnalyzer: EnhancedResponseAnalyzer
   private readonly domainQuestionGenerator: DomainQuestionGenerator
   private readonly adaptiveStyleEngine: AdaptiveQuestioningStyleEngine
+  private readonly assumptionGenerator: AssumptionGenerator
 
   constructor(
     model: string = 'gpt-4o-mini',
@@ -40,6 +42,7 @@ export class DynamicConversationEngine {
     this.responseAnalyzer = new EnhancedResponseAnalyzer(model)
     this.domainQuestionGenerator = new DomainQuestionGenerator(model)
     this.adaptiveStyleEngine = new AdaptiveQuestioningStyleEngine(model)
+    this.assumptionGenerator = new AssumptionGenerator(model)
   }
 
   /**
@@ -218,7 +221,7 @@ export class DynamicConversationEngine {
   }
 
   /**
-   * Detect escape signals and determine if conversation should pivot
+   * Detect escape signals and determine if conversation should pivot to assumptions
    */
   async detectEscapeSignals(
     context: ConversationContext
@@ -239,6 +242,73 @@ export class DynamicConversationEngine {
     }
 
     return false
+  }
+
+  /**
+   * Check if conversation should pivot to assumption generation and handle the pivot
+   */
+  async checkAndHandleAssumptionPivot(
+    context: ConversationContext,
+    responseAnalysis: EnhancedResponseAnalysis
+  ): Promise<AssumptionPivotResult> {
+    try {
+      return await this.assumptionGenerator.shouldPivotToAssumptions(context, responseAnalysis)
+    } catch (error) {
+      console.error('Error in assumption pivot check:', error)
+      return {
+        shouldPivot: false,
+        pivotReason: 'Error in pivot analysis, continuing conversation',
+        transitionMessage: '',
+        userOptions: {
+          proceedWithAssumptions: '',
+          modifyAssumptions: '',
+          continueQuestioning: ''
+        }
+      }
+    }
+  }
+
+  /**
+   * Check if conversation should pivot to assumptions (without generating them)
+   */
+  checkAssumptionPivot(
+    context: ConversationContext,
+    responseAnalysis: EnhancedResponseAnalysis
+  ): { shouldPivot: boolean; pivotReason: string } {
+    return this.assumptionGenerator.checkPivotConditions(context, responseAnalysis)
+  }
+
+  /**
+   * Generate assumptions when escape signals are detected
+   */
+  async generateAssumptions(
+    context: ConversationContext,
+    responseAnalysis: EnhancedResponseAnalysis,
+    pivotReason: string
+  ): Promise<AssumptionSet> {
+    try {
+      return await this.assumptionGenerator.generateAssumptions(context, responseAnalysis, pivotReason)
+    } catch (error) {
+      console.error('Error generating assumptions:', error)
+      throw new Error(`Failed to generate assumptions: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
+  }
+
+  /**
+   * Refine assumptions based on user feedback
+   */
+  async refineAssumptions(
+    originalAssumptions: AssumptionSet,
+    userFeedback: string,
+    context: ConversationContext
+  ): Promise<AssumptionSet> {
+    try {
+      return await this.assumptionGenerator.refineAssumptions(originalAssumptions, userFeedback, context)
+    } catch (error) {
+      console.error('Error refining assumptions:', error)
+      // Return original assumptions if refinement fails
+      return originalAssumptions
+    }
   }
 
   /**

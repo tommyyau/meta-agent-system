@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { DynamicConversationEngine } from '../../../../lib/conversation/dynamic-conversation-engine'
 import type { ConversationContext } from '../../../../lib/types/conversation'
 
+// Configure runtime for longer OpenAI API calls
+export const runtime = 'nodejs'
+export const maxDuration = 30
+
 /**
  * Test endpoint for adaptive questioning style system
  * 

@@ -345,7 +345,7 @@ interface AgentTemplate {
 - [x] Real-time response analysis system (sophistication, clarity, engagement)
 - [x] Dynamic question generation with domain-specific context
 - [x] Adaptive questioning style (novice vs expert vs impatient)
-- [ ] Escape signal detection and assumption pivot logic
+- [x] Escape signal detection and assumption pivot logic
 - [ ] Conversation context preservation across interactions
 - [ ] Domain expertise prompt templates (fintech, healthcare, general)
 
@@ -380,10 +380,13 @@ interface AgentTemplate {
 - `lib/conversation/response-analyzer.ts` - Enhanced multi-dimensional response analysis system
 - `lib/conversation/domain-question-generator.ts` - Domain-specific question generation with expert knowledge
 - `lib/conversation/adaptive-questioning-style.ts` - Intelligent style adaptation system with 7 questioning styles
+- `lib/conversation/assumption-generator.ts` - Escape signal detection and assumption pivot logic system
 - `app/api/conversation/dynamic/route.ts` - API endpoint for basic dynamic conversation testing
 - `app/api/conversation/domain-question/route.ts` - API endpoint for domain-specific question generation
 - `app/api/conversation/adaptive-question/route.ts` - API endpoint for adaptive questioning style testing
+- `app/api/conversation/assumption-pivot/route.ts` - API endpoint for testing escape signal detection and assumption pivot
 - `scripts/test-adaptive-questioning.js` - Comprehensive test suite for adaptive questioning system
+- `scripts/test-assumption-pivot.js` - Test suite for escape signal detection and assumption generation
 - `lib/types/conversation.ts` - Enhanced type definitions with questioning style support
 - `DYNAMIC_CONVERSATION_MILESTONE.md` - Detailed progress tracking and implementation documentation
 
