@@ -20,6 +20,37 @@ export const maxDuration = 30
 const conversationEngine = new DynamicConversationEngine()
 
 /**
+ * Normalize conversation context with proper defaults
+ */
+function normalizeContext(context: ConversationContext): ConversationContext {
+  const defaultUserProfile: UserProfile = {
+    role: 'business',
+    sophisticationLevel: 'novice',
+    domainKnowledge: {},
+    engagementPattern: 'unknown'
+  }
+
+  return {
+    sessionId: context.sessionId || 'default-session',
+    domain: context.domain || 'general',
+    stage: context.stage || ConversationStage.IDEA_CLARITY,
+    conversationHistory: context.conversationHistory || [],
+    userProfile: {
+      ...defaultUserProfile,
+      ...context.userProfile
+    },
+    currentQuestion: context.currentQuestion,
+    lastUpdated: context.lastUpdated || new Date().toISOString(),
+    metadata: context.metadata || {
+      startedAt: new Date().toISOString(),
+      lastUpdated: new Date().toISOString(),
+      totalQuestions: 0,
+      escapeCount: 0
+    }
+  }
+}
+
+/**
  * POST /api/conversation/dynamic
  * Main endpoint for dynamic conversation interaction
  */
@@ -75,13 +106,15 @@ async function handleGenerateQuestion(context: ConversationContext) {
   }
 
   try {
-    const question = await conversationEngine.generateNextQuestion(context)
+    // Ensure context has proper defaults
+    const normalizedContext = normalizeContext(context)
+    const question = await conversationEngine.generateNextQuestion(normalizedContext)
     
     return NextResponse.json({
       success: true,
       question,
       context: {
-        ...context,
+        ...normalizedContext,
         currentQuestion: question
       }
     })
@@ -115,8 +148,9 @@ async function handleAnalyzeResponse(userResponse: string, context: Conversation
   }
 
   try {
-    const analysis = await conversationEngine.analyzeResponse(userResponse, context)
-    const shouldEscape = await conversationEngine.detectEscapeSignals(context)
+    const normalizedContext = normalizeContext(context)
+    const analysis = await conversationEngine.analyzeResponse(userResponse, normalizedContext)
+    const shouldEscape = await conversationEngine.detectEscapeSignals(normalizedContext)
     
     return NextResponse.json({
       success: true,
@@ -155,15 +189,17 @@ async function handleConversationTurn(userResponse: string, context: Conversatio
   }
 
   try {
+    const normalizedContext = normalizeContext(context)
+    
     // Analyze the user's response
-    const responseAnalysis = await conversationEngine.analyzeResponse(userResponse, context)
+    const responseAnalysis = await conversationEngine.analyzeResponse(userResponse, normalizedContext)
     
     // Check for escape signals
-    const shouldEscape = await conversationEngine.detectEscapeSignals(context)
+    const shouldEscape = await conversationEngine.detectEscapeSignals(normalizedContext)
     
     // Update conversation context
     const updatedContext = conversationEngine.updateContext(
-      context,
+      normalizedContext,
       userResponse,
       responseAnalysis
     )

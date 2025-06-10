@@ -158,12 +158,14 @@ async function runConversationDemo() {
       
       // Show specific results for each API
       if (demo.name.includes('Question Generation') && result.data.question) {
-        console.log(`   📝 Generated: "${result.data.question.substring(0, 60)}..."`)
+        const questionText = typeof result.data.question === 'string' ? result.data.question : result.data.question.text || JSON.stringify(result.data.question)
+        console.log(`   📝 Generated: "${questionText.substring(0, 60)}..."`)
       } else if (demo.name.includes('Response Analysis') && result.data.analysis) {
         console.log(`   📊 Sophistication: ${result.data.analysis.sophisticationScore}`)
         console.log(`   📊 Engagement: ${result.data.analysis.engagementLevel}`)
       } else if (demo.name.includes('Conversation Turn') && result.data.nextQuestion) {
-        console.log(`   🔄 Next Question: "${result.data.nextQuestion.substring(0, 50)}..."`)
+        const nextQuestionText = typeof result.data.nextQuestion === 'string' ? result.data.nextQuestion : result.data.nextQuestion.text || JSON.stringify(result.data.nextQuestion)
+        console.log(`   🔄 Next Question: "${nextQuestionText.substring(0, 50)}..."`)
       } else if (demo.name.includes('Assumption Pivot') && result.data.pivotResult) {
         console.log(`   🎯 Should Pivot: ${result.data.pivotResult.shouldPivot}`)
         console.log(`   📝 Assumptions: ${result.data.pivotResult.assumptionSet?.assumptions?.length || 0}`)
