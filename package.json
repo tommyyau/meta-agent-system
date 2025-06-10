@@ -27,7 +27,8 @@
     "test:db": "node scripts/test-db.js",
     "test:services": "npm run test:openai && npm run test:db",
     "test:agent-selection": "node scripts/test-agent-selection.js",
-    "test:sessions": "node scripts/test-session-management.js"
+    "test:sessions": "node scripts/test-session-management.js",
+    "test:conversation": "node scripts/test-conversation-state.js"
   },
   "dependencies": {
     "@headlessui/react": "^1.7.0",
